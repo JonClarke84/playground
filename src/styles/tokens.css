@@ -1,0 +1,64 @@
+/*
+ * Playground design tokens — the single source of visual truth.
+ * Palette: midnight/emerald/pink/gold per PRODUCT.md §8.1.
+ */
+:root {
+  /* Backgrounds (dark, so glow lands) */
+  --midnight-900: #0e0722;
+  --midnight-800: #140b2e;
+  --midnight-700: #1e1240;
+  --midnight-600: #2a1a52;
+  --midnight-500: #382465;
+
+  /* Emerald (the good-magic colour) */
+  --emerald-500: #2fd48a;
+  --emerald-600: #17b273;
+  --emerald-700: #0f9d63;
+  --emerald-glow: rgba(47, 212, 138, 0.55);
+
+  /* Pink (warmth, Glinda-side accents) */
+  --pink-400: #ff9dd4;
+  --pink-500: #ff7ac3;
+  --pink-600: #e14fa0;
+  --pink-glow: rgba(255, 122, 195, 0.5);
+
+  /* Gold (sparkle, rewards, stars) */
+  --gold-400: #ffe08a;
+  --gold-500: #ffd166;
+  --gold-600: #f0b429;
+  --gold-glow: rgba(255, 209, 102, 0.55);
+
+  /* Text */
+  --text-bright: #fff8f0;
+  --text-body: #e6ddff;
+  --text-dim: #b3a5e0;
+  --text-on-light: #2a1a52;
+
+  /* Danger-ish (fizzle) — soft, never harsh red */
+  --fizzle-500: #b78bff;
+
+  /* Type */
+  --font-display: 'Fredoka Variable', 'Fredoka', system-ui, sans-serif;
+  --font-text: 'Nunito Variable', 'Nunito', system-ui, sans-serif;
+
+  /* Radii */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-round: 999px;
+
+  /* Motion — overshoot is the house style */
+  --duration-quick: 140ms;
+  --duration-base: 260ms;
+  --duration-slow: 420ms;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Touch */
+  --tap-min: 64px;
+  --tap-primary: 96px;
+
+  /* Elevation glows (no grey drop shadows on dark UI) */
+  --glow-soft: 0 0 24px;
+  --glow-strong: 0 0 48px;
+}
