@@ -5,6 +5,8 @@ import { sfx } from '../../../lib/audio'
 import { DEFAULT_ROUNDS, advance, answer, createDuel, useHint as applyHint } from '../logic/duel'
 import type { DuelState, FinaleTier } from '../logic/types'
 import { useSpellDuelStore } from '../state/store'
+import { EXAM_ROUNDS, locationForTable } from '../progression'
+import { EXAM_REWARDS, itemById } from '../avatar/unlocks'
 import { DuelBackdrop } from '../art/DuelBackdrop'
 import { Pip, type PipMood } from '../art/Pip'
 import { RivalWitch, type RivalMood } from '../art/RivalWitch'
@@ -19,6 +21,8 @@ interface DuelScreenProps {
   onExit: () => void
   onDone: () => void
   onPlayAgain: () => void
+  /** Set when launched from the academy map: single-table duel, optionally the rival exam. */
+  focus?: { table: number; exam: boolean }
 }
 
 const ENCHANTMENTS = [
@@ -87,16 +91,24 @@ function DuelMotes() {
   )
 }
 
-export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
+export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenProps) {
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
   const completeDuel = useSpellDuelStore((s) => s.completeDuel)
+
+  const isExam = focus?.exam === true
+  const location = focus ? locationForTable(focus.table) : null
+  const examReward = isExam && focus ? itemById(EXAM_REWARDS[focus.table] ?? '') : undefined
+  // Captured at mount so the finale knows whether the reward is NEW.
+  const [rewardIsNew] = useState(
+    () => examReward !== undefined && !useSpellDuelStore.getState().unlockedItems.includes(examReward.id),
+  )
 
   const [duel, setDuel] = useState<DuelState>(() => {
     const store = useSpellDuelStore.getState()
     return createDuel(
       {
-        tables: store.tables,
-        rounds: DEFAULT_ROUNDS,
+        tables: focus ? [focus.table] : store.tables,
+        rounds: isExam ? EXAM_ROUNDS : DEFAULT_ROUNDS,
         allowSubtraction: store.allowSubtraction(),
         startAt: store.askCounter,
         rng: mulberry32(randomSeed()),
@@ -215,7 +227,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
         setPipMood('idle')
         setHeroMood('smile')
         if (settled.finished && settled.lastEvent?.type === 'finished') {
-          completeDuel(settled)
+          completeDuel(settled, isExam && focus ? focus.table : undefined)
           setPhase('finale')
           const tierIndex = settled.lastEvent.tier === 'grand' ? 2 : settled.lastEvent.tier === 'great' ? 1 : 0
           sfx.finale(tierIndex)
@@ -293,6 +305,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
       <div className="duel-top">
         <MagicMeter halves={duel.meterHalves} rounds={duel.config.rounds} />
         <span className="duel-round-label">
+          {isExam && location ? `${location.name} exam — ` : location ? `${location.name} — ` : ''}
           Round {roundNumber} of {duel.config.rounds}
         </span>
       </div>
@@ -303,8 +316,9 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
           ref={rivalRef}
           className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}`}
         >
-          <RivalWitch mood={rivalMood} />
+          <RivalWitch mood={rivalMood} palette={location?.palette} />
         </div>
+        {location && <span className="duel-rival-name">{location.rival}</span>}
       </div>
 
       <div className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`} ref={heroRef}>
@@ -383,8 +397,13 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
           <h2 className="finale-title">{finale.title}</h2>
           <p className="finale-line">{finale.line}</p>
           <p className="finale-dust">
-            <span className="finale-dust-icon">✦</span> +{dustEarned} sparkle dust
+            <span className="finale-dust-icon">✦</span> +{dustEarned + (isExam ? 10 : 0)} sparkle dust
           </p>
+          {isExam && examReward && rewardIsNew && (
+            <p className="finale-reward">
+              🎁 New costume piece: <strong>{examReward.label}</strong>
+            </p>
+          )}
           <div className="finale-actions">
             <button className="button-primary" onClick={onPlayAgain}>
               Duel again!

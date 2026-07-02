@@ -11,9 +11,11 @@ interface TitleScreenProps {
   onExit: () => void
   onPlay: () => void
   onDressingRoom: () => void
+  onMap: () => void
+  onSpellbook: () => void
 }
 
-export function TitleScreen({ onExit, onPlay, onDressingRoom }: TitleScreenProps) {
+export function TitleScreen({ onExit, onPlay, onDressingRoom, onMap, onSpellbook }: TitleScreenProps) {
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
   const tables = useSpellDuelStore((s) => s.tables)
   const toggleTable = useSpellDuelStore((s) => s.toggleTable)
@@ -74,6 +76,15 @@ export function TitleScreen({ onExit, onPlay, onDressingRoom }: TitleScreenProps
           <button className="button-primary sd-title-play" onClick={onPlay}>
             Duel!
           </button>
+
+          <div className="sd-title-links">
+            <button className="button-secondary" onClick={onMap}>
+              🗺️ Academy map
+            </button>
+            <button className="button-secondary" onClick={onSpellbook}>
+              📖 Spellbook
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,13 +1,17 @@
 import { create } from 'zustand'
 import { createStore } from '../../../lib/storage'
 import type { StatsMap, DuelState } from '../logic/types'
+import { starsForTable } from '../logic/progress'
 import type { AvatarConfig } from '../avatar/avatarTypes'
+import type { CostumeItem } from '../avatar/unlocks'
+import { EXAM_REWARDS } from '../avatar/unlocks'
 
 /**
  * Persisted Spell Duel state (PRODUCT.md §7.4).
  * Subtraction splits unlock once she has seen enough additive splits (§4.4).
  */
 const ADDITIVE_SPLITS_BEFORE_SUBTRACTION = 6
+const EXAM_BONUS_DUST = 10
 
 export interface SpellDuelPersisted {
   avatar: AvatarConfig | null
@@ -19,21 +23,43 @@ export interface SpellDuelPersisted {
   sparkleDust: number
   hintsSeen: number
   duelsCompleted: number
+  /** CostumeItem ids owned (exam rewards or bought with dust). */
+  unlockedItems: string[]
+  /** Tables whose rival exam has been passed. */
+  examsPassed: number[]
+  /** Best map stars seen per table (keys are table numbers). Only goes up. */
+  bestStars: Record<string, number>
+}
+
+const DEFAULTS: SpellDuelPersisted = {
+  avatar: null,
+  tables: [2, 5, 10],
+  soundOn: true,
+  stats: {},
+  askCounter: 1,
+  sparkleDust: 0,
+  hintsSeen: 0,
+  duelsCompleted: 0,
+  unlockedItems: [],
+  examsPassed: [],
+  bestStars: {},
+}
+
+/**
+ * v1 → v2 added unlockedItems/examsPassed/bestStars. Shallow guard is the
+ * same trust boundary as the storage envelope: we verify the wrapper shape,
+ * not every field.
+ */
+function isV1Shape(data: unknown): data is Partial<SpellDuelPersisted> {
+  return typeof data === 'object' && data !== null && 'stats' in data && 'tables' in data
 }
 
 const persisted = createStore<SpellDuelPersisted>({
   key: 'playground:spell-duel',
-  version: 1,
-  defaults: {
-    avatar: null,
-    tables: [2, 5, 10],
-    soundOn: true,
-    stats: {},
-    askCounter: 1,
-    sparkleDust: 0,
-    hintsSeen: 0,
-    duelsCompleted: 0,
-  },
+  version: 2,
+  defaults: DEFAULTS,
+  migrate: (fromVersion, data) =>
+    fromVersion === 1 && isV1Shape(data) ? { ...DEFAULTS, ...data } : null,
 })
 
 interface SpellDuelStore extends SpellDuelPersisted {
@@ -42,7 +68,9 @@ interface SpellDuelStore extends SpellDuelPersisted {
   setTables: (tables: number[]) => void
   toggleSound: () => void
   /** Folds a finished duel back into persistent progress. */
-  completeDuel: (duel: DuelState) => void
+  completeDuel: (duel: DuelState, examTable?: number) => void
+  /** Spends sparkle dust on a locked costume piece. No-op if unaffordable. */
+  buyItem: (item: CostumeItem) => void
   allowSubtraction: () => boolean
 }
 
@@ -67,16 +95,48 @@ export const useSpellDuelStore = create<SpellDuelStore>((set, get) => ({
 
   toggleSound: () => set((state) => ({ soundOn: !state.soundOn })),
 
-  completeDuel: (duel) =>
+  completeDuel: (duel, examTable) =>
     set((state) => {
       const hintsThisDuel = duel.history.filter((r) => r.usedHint).length
       const brilliants = duel.history.filter((r) => r.quality === 'brilliant').length
+
+      const bestStars = { ...state.bestStars }
+      for (let table = 2; table <= 12; table++) {
+        const stars = starsForTable(table, duel.stats)
+        const key = String(table)
+        if (stars > (bestStars[key] ?? 0)) bestStars[key] = stars
+      }
+
+      const isExam = examTable !== undefined
+      const reward = isExam ? EXAM_REWARDS[examTable] : undefined
+      const unlockedItems =
+        reward !== undefined && !state.unlockedItems.includes(reward)
+          ? [...state.unlockedItems, reward]
+          : state.unlockedItems
+      const examsPassed =
+        isExam && !state.examsPassed.includes(examTable)
+          ? [...state.examsPassed, examTable].sort((x, y) => x - y)
+          : state.examsPassed
+
       return {
         stats: duel.stats,
         askCounter: state.askCounter + duel.history.length,
-        sparkleDust: state.sparkleDust + duel.meterHalves + brilliants,
+        sparkleDust:
+          state.sparkleDust + duel.meterHalves + brilliants + (isExam ? EXAM_BONUS_DUST : 0),
         hintsSeen: state.hintsSeen + hintsThisDuel,
         duelsCompleted: state.duelsCompleted + 1,
+        bestStars,
+        unlockedItems,
+        examsPassed,
+      }
+    }),
+
+  buyItem: (item) =>
+    set((state) => {
+      if (state.unlockedItems.includes(item.id) || state.sparkleDust < item.price) return state
+      return {
+        sparkleDust: state.sparkleDust - item.price,
+        unlockedItems: [...state.unlockedItems, item.id],
       }
     }),
 
@@ -94,5 +154,8 @@ useSpellDuelStore.subscribe((state) => {
     sparkleDust: state.sparkleDust,
     hintsSeen: state.hintsSeen,
     duelsCompleted: state.duelsCompleted,
+    unlockedItems: state.unlockedItems,
+    examsPassed: state.examsPassed,
+    bestStars: state.bestStars,
   })
 })

@@ -14,6 +14,8 @@ import {
   OUTFITS,
   SKIN_TONES,
 } from '../avatar/avatarTypes'
+import type { CostumeItem } from '../avatar/unlocks'
+import { lockedItemFor } from '../avatar/unlocks'
 
 type CategoryId = 'skin' | 'hairStyle' | 'hairColour' | 'hat' | 'outfit' | 'outfitColour' | 'accessory'
 
@@ -39,12 +41,33 @@ interface AvatarCreatorProps {
 export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
   const stored = useSpellDuelStore((s) => s.avatar)
   const setAvatar = useSpellDuelStore((s) => s.setAvatar)
+  const unlockedItems = useSpellDuelStore((s) => s.unlockedItems)
+  const sparkleDust = useSpellDuelStore((s) => s.sparkleDust)
+  const buyItem = useSpellDuelStore((s) => s.buyItem)
   const avatar = stored ?? DEFAULT_AVATAR
   const [category, setCategory] = useState<CategoryId>('skin')
+  const [deniedId, setDeniedId] = useState<string | null>(null)
 
   const update = (patch: Partial<AvatarConfig>) => {
     sfx.tap()
     setAvatar({ ...avatar, ...patch })
+  }
+
+  /** Free/owned options apply directly; locked ones try to buy with dust. */
+  const pickOrBuy = (lock: CostumeItem | undefined, apply: () => void) => {
+    if (!lock || unlockedItems.includes(lock.id)) {
+      apply()
+      return
+    }
+    buyItem(lock)
+    if (useSpellDuelStore.getState().unlockedItems.includes(lock.id)) {
+      sfx.cast()
+      apply()
+    } else {
+      sfx.fizzle()
+      setDeniedId(lock.id)
+      window.setTimeout(() => setDeniedId(null), 550)
+    }
   }
 
   const surprise = () => {
@@ -84,33 +107,49 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
           swatch: colour.base,
         }))
       case 'hairStyle':
-        return HAIR_STYLES.map((id) => ({
-          key: id,
-          active: avatar.hairStyle === id,
-          onPick: () => update({ hairStyle: id }),
-          preview: { ...avatar, hairStyle: id, hat: 'none' as const },
-        }))
+        return HAIR_STYLES.map((id) => {
+          const lock = lockedItemFor('hairStyle', id)
+          return {
+            key: id,
+            active: avatar.hairStyle === id,
+            onPick: () => pickOrBuy(lock, () => update({ hairStyle: id })),
+            preview: { ...avatar, hairStyle: id, hat: 'none' as const },
+            lock,
+          }
+        })
       case 'hat':
-        return HATS.map((id) => ({
-          key: id,
-          active: avatar.hat === id,
-          onPick: () => update({ hat: id }),
-          preview: { ...avatar, hat: id },
-        }))
+        return HATS.map((id) => {
+          const lock = lockedItemFor('hat', id)
+          return {
+            key: id,
+            active: avatar.hat === id,
+            onPick: () => pickOrBuy(lock, () => update({ hat: id })),
+            preview: { ...avatar, hat: id },
+            lock,
+          }
+        })
       case 'outfit':
-        return OUTFITS.map((id) => ({
-          key: id,
-          active: avatar.outfit === id,
-          onPick: () => update({ outfit: id }),
-          preview: { ...avatar, outfit: id },
-        }))
+        return OUTFITS.map((id) => {
+          const lock = lockedItemFor('outfit', id)
+          return {
+            key: id,
+            active: avatar.outfit === id,
+            onPick: () => pickOrBuy(lock, () => update({ outfit: id })),
+            preview: { ...avatar, outfit: id },
+            lock,
+          }
+        })
       case 'accessory':
-        return ACCESSORIES.map((id) => ({
-          key: id,
-          active: avatar.accessory === id,
-          onPick: () => update({ accessory: id }),
-          preview: { ...avatar, accessory: id },
-        }))
+        return ACCESSORIES.map((id) => {
+          const lock = lockedItemFor('accessory', id)
+          return {
+            key: id,
+            active: avatar.accessory === id,
+            onPick: () => pickOrBuy(lock, () => update({ accessory: id })),
+            preview: { ...avatar, accessory: id },
+            lock,
+          }
+        })
     }
   })()
 
@@ -130,6 +169,7 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
         </div>
 
         <div className="creator-panel">
+          <span className="creator-dust">✦ {sparkleDust} sparkle dust</span>
           <div className="creator-tabs">
             {CATEGORIES.map((cat) => (
               <button
@@ -146,23 +186,30 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
           </div>
 
           <div className="creator-options">
-            {options.map((opt) => (
-              <button
-                key={opt.key}
-                className={`creator-option${opt.active ? ' creator-option--on' : ''}`}
-                onClick={opt.onPick}
-                aria-pressed={opt.active}
-                aria-label={opt.key}
-              >
-                {'swatch' in opt && opt.swatch !== undefined ? (
-                  <span className="creator-swatch" style={{ background: opt.swatch }} />
-                ) : 'preview' in opt && opt.preview !== undefined ? (
-                  <span className="creator-mini">
-                    <WitchAvatar config={opt.preview} />
-                  </span>
-                ) : null}
-              </button>
-            ))}
+            {options.map((opt) => {
+              const lock = 'lock' in opt ? opt.lock : undefined
+              const isLocked = lock !== undefined && !unlockedItems.includes(lock.id)
+              return (
+                <button
+                  key={opt.key}
+                  className={`creator-option${opt.active ? ' creator-option--on' : ''}${
+                    isLocked ? ' creator-option--locked' : ''
+                  }${lock !== undefined && deniedId === lock.id ? ' creator-option--denied' : ''}`}
+                  onClick={opt.onPick}
+                  aria-pressed={opt.active}
+                  aria-label={isLocked && lock ? `${lock.label} — ${lock.price} sparkle dust` : opt.key}
+                >
+                  {'swatch' in opt && opt.swatch !== undefined ? (
+                    <span className="creator-swatch" style={{ background: opt.swatch }} />
+                  ) : 'preview' in opt && opt.preview !== undefined ? (
+                    <span className="creator-mini">
+                      <WitchAvatar config={opt.preview} />
+                    </span>
+                  ) : null}
+                  {isLocked && lock && <span className="creator-price">✦ {lock.price}</span>}
+                </button>
+              )
+            })}
           </div>
 
           <button
