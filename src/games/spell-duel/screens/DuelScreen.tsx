@@ -5,7 +5,7 @@ import { sfx } from '../../../lib/audio'
 import { DEFAULT_ROUNDS, advance, answer, createDuel, useHint as applyHint } from '../logic/duel'
 import type { DuelState, FinaleTier } from '../logic/types'
 import { useSpellDuelStore } from '../state/store'
-import { EXAM_ROUNDS, locationForTable } from '../progression'
+import { DEFAULT_BLURBS, EXAM_ROUNDS, locationForTable } from '../progression'
 import { EXAM_REWARDS, itemById } from '../avatar/unlocks'
 import { DuelBackdrop } from '../art/DuelBackdrop'
 import { Pip, type PipMood } from '../art/Pip'
@@ -25,24 +25,14 @@ interface DuelScreenProps {
   focus?: { table: number; exam: boolean }
 }
 
-const ENCHANTMENTS = [
-  'Frogs are raining in the library!',
-  'The teacher is floating away!',
-  'All the shoes are dancing!',
-  'The books are flying south!',
-  'Someone turned the soup to slime!',
-  'The paintings are giggling!',
-  'Every quill is writing nonsense!',
-  'The staircase is going backwards!',
-  'The pumpkins are juggling themselves!',
-  'The chandeliers are doing spins!',
-]
-
 const PIP_HINT_LINES = [
   'Ooh, sneaky — two little spells beat one big one!',
   'Crack it into spells you know!',
   'Little spells first, then add them up!',
 ]
+
+const PIP_WAND_INTRO = 'See that glowing wand? Tap it to crack a big spell into little ones — real witch maths!'
+const PIP_WAND_NUDGE = 'Tricky one! Try the Hint Wand ✨'
 
 const FINALE_COPY: Record<FinaleTier, { title: string; line: string }> = {
   good: { title: 'Lovely casting!', line: 'The enchantments are undone!' },
@@ -123,6 +113,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   const [rivalMood, setRivalMood] = useState<RivalMood>('smug')
   const [heroMood, setHeroMood] = useState<Expression>('smile')
   const [heroCasting, setHeroCasting] = useState(false)
+  const [wandNudge, setWandNudge] = useState(false)
   const [beam, setBeam] = useState<BeamState | null>(null)
   const [impactKey, setImpactKey] = useState(0)
   const { canvasRef, handle } = useParticleCanvas()
@@ -134,6 +125,24 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   useEffect(() => {
     const pending = timers.current
     return () => pending.forEach((t) => window.clearTimeout(t))
+  }, [])
+
+  // Pip introduces the Hint Wand once, at the start of her very first duel —
+  // the wand is the whole pedagogical point, so it must not go undiscovered.
+  useEffect(() => {
+    if (useSpellDuelStore.getState().wandIntroduced) return
+    const timer = window.setTimeout(() => {
+      setPipLine(PIP_WAND_INTRO)
+      setWandNudge(true)
+      useSpellDuelStore.getState().markWandIntroduced()
+      timers.current.push(
+        window.setTimeout(() => {
+          setPipLine(null)
+          setWandNudge(false)
+        }, 5200),
+      )
+    }, 1200)
+    timers.current.push(timer)
   }, [])
 
   const later = (ms: number, fn: () => void) => {
@@ -182,7 +191,8 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   }
 
   const roundNumber = Math.min(duel.history.length + 1, duel.config.rounds)
-  const blurb = ENCHANTMENTS[(duel.config.startAt + duel.roundIndex) % ENCHANTMENTS.length]
+  const blurbPool = location?.blurbs ?? DEFAULT_BLURBS
+  const blurb = blurbPool[(duel.config.startAt + duel.roundIndex) % blurbPool.length]
   const lastRecord = duel.history[duel.history.length - 1]
 
   function handleAnswer(value: number) {
@@ -239,6 +249,15 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
       sfx.fizzle()
       setPipMood('oops')
       setHeroMood('wow')
+      // Two misses on the same spell and the wand hasn't been tried: nudge.
+      if (next.current !== null && next.current.popped.length >= 2 && next.current.hintStage === 0) {
+        setPipLine(PIP_WAND_NUDGE)
+        setWandNudge(true)
+        later(4000, () => {
+          setPipLine(null)
+          setWandNudge(false)
+        })
+      }
       // Droopy comic sparks slumping off the crystal.
       burstAt(0.5, 0.42, {
         count: 20,
@@ -261,6 +280,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
     sfx.hint()
     setDuel(next)
     setHeroMood('thinking')
+    setWandNudge(false)
     if (next.current?.hintStage === 1) {
       setPipLine(PIP_HINT_LINES[duel.roundIndex % PIP_HINT_LINES.length])
       later(3600, () => setPipLine(null))
@@ -298,7 +318,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
 
   return (
     <div className={`duel${impactKey > 0 && phase === 'casting' ? ' duel--shake' : ''}`} ref={stageRef}>
-      <DuelBackdrop />
+      <DuelBackdrop theme={location?.theme} />
       <DuelMotes />
       <HomeButton onExit={onExit} />
 
@@ -316,9 +336,14 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
           ref={rivalRef}
           className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}`}
         >
-          <RivalWitch mood={rivalMood} palette={location?.palette} />
+          <RivalWitch
+            mood={rivalMood}
+            palette={location?.boss.palette}
+            emblem={location?.boss.emblem}
+            companion={location?.boss.companion}
+          />
         </div>
-        {location && <span className="duel-rival-name">{location.rival}</span>}
+        {location && <span className="duel-rival-name">{location.boss.name}</span>}
       </div>
 
       <div className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`} ref={heroRef}>
@@ -344,7 +369,11 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
       </div>
 
       {phase === 'question' && duel.current && duel.current.hintStage < 2 && (
-        <button className="hint-wand" onClick={handleHint} aria-label="Use the Hint Wand">
+        <button
+          className={`hint-wand${wandNudge ? ' hint-wand--nudge' : ''}`}
+          onClick={handleHint}
+          aria-label="Use the Hint Wand"
+        >
           <svg viewBox="0 0 48 48" aria-hidden="true">
             <line x1="12" y1="36" x2="30" y2="18" stroke="#8b5a2b" strokeWidth="5" strokeLinecap="round" />
             <path

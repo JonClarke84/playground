@@ -5,6 +5,7 @@ import { sfx } from '../../../lib/audio'
 import { useSpellDuelStore } from '../state/store'
 import { MAP_LOCATIONS, type MapLocation } from '../progression'
 import { EXAM_REWARDS, itemById } from '../avatar/unlocks'
+import { RivalWitch } from '../art/RivalWitch'
 
 /**
  * The academy-year map (PRODUCT.md §4.6): a winding path of locations, one
@@ -66,7 +67,11 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
           <button
             key={loc.table}
             className={`map-node${passed ? ' map-node--passed' : ''}`}
-            style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              ...(passed ? {} : { borderColor: `${loc.theme.accent}66` }),
+            }}
             onClick={() => {
               setSelected(loc)
               sfx.tap()
@@ -83,9 +88,16 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
       {selected && (
         <div className="map-sheet" onClick={() => setSelected(null)}>
           <div className="map-sheet-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="map-sheet-boss">
+              <RivalWitch
+                palette={selected.boss.palette}
+                emblem={selected.boss.emblem}
+                companion={selected.boss.companion}
+              />
+            </div>
             <h3>{selected.name}</h3>
             <p className="map-sheet-sub">
-              The {selected.table}s · Examiner: <strong>{selected.rival}</strong>
+              The {selected.table}s · Examiner: <strong>{selected.boss.name}</strong>
               {(() => {
                 const reward = itemById(EXAM_REWARDS[selected.table] ?? '')
                 return reward && !examsPassed.includes(selected.table)
@@ -99,7 +111,7 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
                 Practise
               </button>
               <button className="button-primary" onClick={() => onPlay(selected.table, true)}>
-                {examsPassed.includes(selected.table) ? 'Exam again!' : `Duel ${selected.rival}!`}
+                {examsPassed.includes(selected.table) ? 'Exam again!' : `Duel ${selected.boss.name}!`}
               </button>
             </div>
           </div>

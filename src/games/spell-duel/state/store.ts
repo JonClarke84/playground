@@ -29,6 +29,8 @@ export interface SpellDuelPersisted {
   examsPassed: number[]
   /** Best map stars seen per table (keys are table numbers). Only goes up. */
   bestStars: Record<string, number>
+  /** True once Pip has introduced the Hint Wand (first duel only). */
+  wandIntroduced: boolean
 }
 
 const DEFAULTS: SpellDuelPersisted = {
@@ -43,23 +45,25 @@ const DEFAULTS: SpellDuelPersisted = {
   unlockedItems: [],
   examsPassed: [],
   bestStars: {},
+  wandIntroduced: false,
 }
 
 /**
- * v1 → v2 added unlockedItems/examsPassed/bestStars. Shallow guard is the
- * same trust boundary as the storage envelope: we verify the wrapper shape,
- * not every field.
+ * v2 added unlockedItems/examsPassed/bestStars; v3 added wandIntroduced.
+ * Every migration is additive, so spreading old data over DEFAULTS covers
+ * all older versions. Shallow guard is the same trust boundary as the
+ * storage envelope: we verify the wrapper shape, not every field.
  */
-function isV1Shape(data: unknown): data is Partial<SpellDuelPersisted> {
+function isLegacyShape(data: unknown): data is Partial<SpellDuelPersisted> {
   return typeof data === 'object' && data !== null && 'stats' in data && 'tables' in data
 }
 
 const persisted = createStore<SpellDuelPersisted>({
   key: 'playground:spell-duel',
-  version: 2,
+  version: 3,
   defaults: DEFAULTS,
   migrate: (fromVersion, data) =>
-    fromVersion === 1 && isV1Shape(data) ? { ...DEFAULTS, ...data } : null,
+    fromVersion <= 2 && isLegacyShape(data) ? { ...DEFAULTS, ...data } : null,
 })
 
 interface SpellDuelStore extends SpellDuelPersisted {
@@ -71,6 +75,7 @@ interface SpellDuelStore extends SpellDuelPersisted {
   completeDuel: (duel: DuelState, examTable?: number) => void
   /** Spends sparkle dust on a locked costume piece. No-op if unaffordable. */
   buyItem: (item: CostumeItem) => void
+  markWandIntroduced: () => void
   allowSubtraction: () => boolean
 }
 
@@ -140,6 +145,8 @@ export const useSpellDuelStore = create<SpellDuelStore>((set, get) => ({
       }
     }),
 
+  markWandIntroduced: () => set({ wandIntroduced: true }),
+
   allowSubtraction: () => get().hintsSeen >= ADDITIVE_SPLITS_BEFORE_SUBTRACTION,
 }))
 
@@ -157,5 +164,6 @@ useSpellDuelStore.subscribe((state) => {
     unlockedItems: state.unlockedItems,
     examsPassed: state.examsPassed,
     bestStars: state.bestStars,
+    wandIntroduced: state.wandIntroduced,
   })
 })

@@ -306,6 +306,23 @@
   50% { transform: translateY(-9px); }
 }
 
+.clock-gear {
+  animation: gear-turn 14s linear infinite;
+}
+
+@keyframes gear-turn {
+  to { transform: rotate(360deg); }
+}
+
+.clock-pendulum {
+  animation: pendulum-swing 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes pendulum-swing {
+  from { transform: rotate(-13deg); }
+  to { transform: rotate(13deg); }
+}
+
 .duel-top {
   position: absolute;
   top: 18px;
@@ -603,6 +620,17 @@
 @keyframes wand-pulse {
   0%, 100% { box-shadow: 0 0 12px var(--gold-glow); }
   50% { box-shadow: 0 0 30px var(--gold-glow); }
+}
+
+/* Pip is pointing at the wand — make it impossible to miss. */
+.hint-wand--nudge {
+  animation: wand-nudge 0.9s var(--ease-pop) infinite;
+  border-color: var(--gold-400);
+}
+
+@keyframes wand-nudge {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 18px var(--gold-glow); }
+  50% { transform: scale(1.18); box-shadow: 0 0 44px var(--gold-glow), 0 0 80px var(--gold-glow); }
 }
 
 .duel-hero {
@@ -990,6 +1018,13 @@
 
 .map-sheet-panel h3 {
   font-size: 30px;
+}
+
+/* Boss peeks over the top edge of the sheet */
+.map-sheet-boss {
+  width: 190px;
+  margin-top: -96px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
 
 .map-sheet-sub {
