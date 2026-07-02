@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { HomeButton } from '../../../shell/HomeButton'
 import { mulberry32, randomSeed } from '../../../lib/rng'
 import { sfx } from '../../../lib/audio'
@@ -9,7 +9,7 @@ import { DuelBackdrop } from '../art/DuelBackdrop'
 import { Pip, type PipMood } from '../art/Pip'
 import { RivalWitch, type RivalMood } from '../art/RivalWitch'
 import { WitchAvatar } from '../avatar/WitchAvatar'
-import { DEFAULT_AVATAR } from '../avatar/avatarTypes'
+import { DEFAULT_AVATAR, type Expression } from '../avatar/avatarTypes'
 import { SpellCrystal } from '../components/SpellCrystal'
 import { AnswerBubbles } from '../components/AnswerBubbles'
 import { MagicMeter } from '../components/MagicMeter'
@@ -46,6 +46,47 @@ const FINALE_COPY: Record<FinaleTier, { title: string; line: string }> = {
   grand: { title: 'Grand Sorceress!', line: 'The whole academy is cheering!' },
 }
 
+interface BeamState {
+  left: number
+  top: number
+  length: number
+  angle: number
+  thin: boolean
+}
+
+/** Ambient magic motes drifting up through the hall. */
+function DuelMotes() {
+  const motes = useMemo(() => {
+    const rng = mulberry32(77)
+    return Array.from({ length: 16 }, (_, i) => ({
+      id: i,
+      left: 3 + rng() * 94,
+      size: 3 + rng() * 5,
+      duration: 9 + rng() * 14,
+      delay: rng() * -20,
+      gold: rng() < 0.35,
+    }))
+  }, [])
+  return (
+    <div className="duel-motes" aria-hidden="true">
+      {motes.map((m) => (
+        <span
+          key={m.id}
+          className="duel-mote"
+          style={{
+            left: `${m.left}%`,
+            width: m.size,
+            height: m.size,
+            background: m.gold ? 'var(--gold-400)' : 'var(--emerald-500)',
+            animationDuration: `${m.duration}s`,
+            animationDelay: `${m.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
   const completeDuel = useSpellDuelStore((s) => s.completeDuel)
@@ -68,8 +109,14 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
   const [pipMood, setPipMood] = useState<PipMood>('idle')
   const [pipLine, setPipLine] = useState<string | null>(null)
   const [rivalMood, setRivalMood] = useState<RivalMood>('smug')
+  const [heroMood, setHeroMood] = useState<Expression>('smile')
+  const [heroCasting, setHeroCasting] = useState(false)
+  const [beam, setBeam] = useState<BeamState | null>(null)
+  const [impactKey, setImpactKey] = useState(0)
   const { canvasRef, handle } = useParticleCanvas()
   const stageRef = useRef<HTMLDivElement | null>(null)
+  const heroRef = useRef<HTMLDivElement | null>(null)
+  const rivalRef = useRef<HTMLDivElement | null>(null)
   const timers = useRef<number[]>([])
 
   useEffect(() => {
@@ -87,6 +134,41 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
     handle.burst(stage.clientWidth * fx, stage.clientHeight * fy, opts)
   }
 
+  const burstAtPx = (x: number, y: number, opts?: Parameters<typeof handle.burst>[2]) => {
+    handle.burst(x, y, opts)
+  }
+
+  /** Fires the spell beam from her wand to Nix; returns the impact point. */
+  const fireBeam = (thin: boolean): { x: number; y: number } | null => {
+    const stage = stageRef.current
+    const hero = heroRef.current
+    const rival = rivalRef.current
+    if (!stage || !hero || !rival) return null
+    const stageBox = stage.getBoundingClientRect()
+    const heroBox = hero.getBoundingClientRect()
+    const rivalBox = rival.getBoundingClientRect()
+    const start = {
+      x: heroBox.left - stageBox.left + heroBox.width * 0.82,
+      y: heroBox.top - stageBox.top + heroBox.height * 0.4,
+    }
+    const end = {
+      x: rivalBox.left - stageBox.left + rivalBox.width * 0.35,
+      y: rivalBox.top - stageBox.top + rivalBox.height * 0.6,
+    }
+    const dx = end.x - start.x
+    const dy = end.y - start.y
+    setBeam({
+      left: start.x,
+      top: start.y,
+      length: Math.hypot(dx, dy),
+      angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+      thin,
+    })
+    later(700, () => setBeam(null))
+    burstAtPx(start.x, start.y, { count: thin ? 14 : 22, speed: 4 })
+    return end
+  }
+
   const roundNumber = Math.min(duel.history.length + 1, duel.config.rounds)
   const blurb = ENCHANTMENTS[(duel.config.startAt + duel.roundIndex) % ENCHANTMENTS.length]
   const lastRecord = duel.history[duel.history.length - 1]
@@ -98,20 +180,40 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
     setDuel(next)
 
     if (next.lastEvent?.type === 'cast') {
+      const brilliant = next.lastEvent.quality === 'brilliant'
       sfx.cast()
-      setRivalMood('shocked')
       setPipMood('cheer')
       setPipLine(null)
       setPhase('casting')
-      burstAt(0.5, 0.4, { count: next.lastEvent.quality === 'brilliant' ? 46 : 26 })
-      burstAt(0.78, 0.28, { count: 18, colours: ['#ff7ac3', '#ffd166', '#fff8f0'], speed: 4 })
+      setHeroMood('grin')
+      setHeroCasting(true)
+      later(650, () => setHeroCasting(false))
 
-      later(1500, () => {
+      // 1. Crystal flares…
+      burstAt(0.5, 0.4, { count: brilliant ? 46 : 26 })
+      // 2. …the beam fires from her wand…
+      const impact = fireBeam(!brilliant)
+      // 3. …and lands on Nix: burst, shock, shake, flash.
+      later(320, () => {
+        setRivalMood('shocked')
+        setImpactKey((k) => k + 1)
+        if (impact) {
+          burstAtPx(impact.x, impact.y, {
+            count: brilliant ? 56 : 32,
+            speed: 7,
+            colours: ['#2fd48a', '#7dedbb', '#ffd166', '#ff7ac3', '#fff8f0'],
+          })
+          burstAtPx(impact.x, impact.y, { count: 16, speed: 3, gravity: 0.12 })
+        }
+      })
+
+      later(1700, () => {
         const settled = advance(next)
         setDuel(settled)
         setRevealed({ left: false, right: false })
         setRivalMood('smug')
         setPipMood('idle')
+        setHeroMood('smile')
         if (settled.finished && settled.lastEvent?.type === 'finished') {
           completeDuel(settled)
           setPhase('finale')
@@ -124,7 +226,19 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
     } else if (next.lastEvent?.type === 'fizzle') {
       sfx.fizzle()
       setPipMood('oops')
-      later(1100, () => setPipMood('idle'))
+      setHeroMood('wow')
+      // Droopy comic sparks slumping off the crystal.
+      burstAt(0.5, 0.42, {
+        count: 20,
+        speed: 2.2,
+        gravity: 0.22,
+        colours: ['#b78bff', '#8a7bc5', '#6f6390'],
+        twinkle: false,
+      })
+      later(1100, () => {
+        setPipMood('idle')
+        setHeroMood('smile')
+      })
     }
   }
 
@@ -134,6 +248,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
     if (next === duel) return
     sfx.hint()
     setDuel(next)
+    setHeroMood('thinking')
     if (next.current?.hintStage === 1) {
       setPipLine(PIP_HINT_LINES[duel.roundIndex % PIP_HINT_LINES.length])
       later(3600, () => setPipLine(null))
@@ -170,8 +285,9 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
     duel.meterHalves + duel.history.filter((r) => r.quality === 'brilliant').length
 
   return (
-    <div className="duel" ref={stageRef}>
+    <div className={`duel${impactKey > 0 && phase === 'casting' ? ' duel--shake' : ''}`} ref={stageRef}>
       <DuelBackdrop />
+      <DuelMotes />
       <HomeButton onExit={onExit} />
 
       <div className="duel-top">
@@ -183,9 +299,16 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
 
       <div className="duel-rival">
         {phase === 'question' && <div className="speech speech--rival">{blurb}</div>}
-        <div className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}`}>
+        <div
+          ref={rivalRef}
+          className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}`}
+        >
           <RivalWitch mood={rivalMood} />
         </div>
+      </div>
+
+      <div className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`} ref={heroRef}>
+        <WitchAvatar config={avatar} expression={heroMood} />
       </div>
 
       <div className="duel-centre">
@@ -234,6 +357,21 @@ export function DuelScreen({ onExit, onDone, onPlayAgain }: DuelScreenProps) {
           onAnswer={handleAnswer}
         />
       )}
+
+      {beam && (
+        <div
+          className={`spell-beam${beam.thin ? ' spell-beam--thin' : ''}`}
+          style={{
+            left: beam.left,
+            top: beam.top,
+            width: beam.length,
+            transform: `rotate(${beam.angle}deg)`,
+          }}
+        >
+          <div className="spell-beam-core" />
+        </div>
+      )}
+      {phase === 'casting' && impactKey > 0 && <div key={impactKey} className="duel-flash" />}
 
       <canvas className="particle-canvas" ref={canvasRef} />
 

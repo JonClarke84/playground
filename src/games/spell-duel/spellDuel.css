@@ -605,14 +605,33 @@
   50% { box-shadow: 0 0 30px var(--gold-glow); }
 }
 
+.duel-hero {
+  position: absolute;
+  left: clamp(10px, 2.5vw, 48px);
+  bottom: clamp(64px, 11vh, 116px);
+  width: clamp(170px, 19vw, 260px);
+  z-index: 9;
+  animation: pip-bob 3.2s ease-in-out infinite;
+}
+
+.duel-hero--cast {
+  animation: hero-cast 0.65s var(--ease-pop);
+}
+
+@keyframes hero-cast {
+  0% { transform: translateY(0) rotate(0) scale(1); }
+  35% { transform: translateY(-16px) rotate(5deg) scale(1.07); }
+  100% { transform: translateY(0) rotate(0) scale(1); }
+}
+
 .duel-pip {
   position: absolute;
-  left: clamp(16px, 3vw, 48px);
-  bottom: clamp(120px, 20vh, 190px);
+  right: clamp(14px, 2.5vw, 44px);
+  bottom: clamp(84px, 13vh, 140px);
   z-index: 8;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
 .duel-pip-art {
@@ -679,6 +698,101 @@
   inset: 0;
   z-index: 20;
   pointer-events: none;
+}
+
+/* ============ Spell FX ============ */
+
+.spell-beam {
+  position: absolute;
+  height: 20px;
+  margin-top: -10px;
+  transform-origin: left center;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.spell-beam-core {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-round);
+  background: linear-gradient(
+    90deg,
+    rgba(125, 237, 187, 0) 0%,
+    #7dedbb 22%,
+    #fff8f0 50%,
+    var(--gold-400) 78%,
+    #fff8f0 100%
+  );
+  box-shadow:
+    0 0 18px var(--emerald-glow),
+    0 0 46px var(--emerald-glow),
+    0 0 80px var(--gold-glow);
+  transform-origin: left center;
+  animation: beam-fire 0.62s var(--ease-smooth) forwards;
+}
+
+.spell-beam--thin {
+  height: 11px;
+  margin-top: -5.5px;
+}
+
+@keyframes beam-fire {
+  0% { transform: scaleX(0); opacity: 1; }
+  40% { transform: scaleX(1); opacity: 1; }
+  75% { transform: scaleX(1); opacity: 0.85; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+.duel-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  pointer-events: none;
+  background: radial-gradient(60% 60% at 72% 26%, rgba(255, 248, 240, 0.5), rgba(47, 212, 138, 0.18) 45%, transparent 75%);
+  animation: flash-pop 0.5s ease-out forwards;
+}
+
+@keyframes flash-pop {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.duel--shake {
+  animation: duel-shake 0.45s ease-out;
+}
+
+@keyframes duel-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-7px, 4px); }
+  40% { transform: translate(6px, -5px); }
+  60% { transform: translate(-4px, 3px); }
+  80% { transform: translate(3px, -2px); }
+}
+
+.duel-motes {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.duel-mote {
+  position: absolute;
+  bottom: -12px;
+  border-radius: var(--radius-round);
+  opacity: 0;
+  filter: blur(0.5px);
+  box-shadow: 0 0 8px currentColor;
+  animation: mote-rise linear infinite;
+}
+
+@keyframes mote-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 0.55; }
+  85% { opacity: 0.35; }
+  100% { transform: translateY(-104vh); opacity: 0; }
 }
 
 /* ============ Finale ============ */
