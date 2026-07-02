@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { HomeButton } from '../../../shell/HomeButton'
 import { mulberry32, randomSeed } from '../../../lib/rng'
 import { sfx } from '../../../lib/audio'
+import { duelTrack, startMusic, stopMusic } from '../../../lib/music'
 import { DEFAULT_ROUNDS, advance, answer, createDuel, useHint as applyHint } from '../logic/duel'
 import type { DuelState, FinaleTier } from '../logic/types'
 import { useSpellDuelStore } from '../state/store'
@@ -83,6 +84,7 @@ function DuelMotes() {
 
 export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenProps) {
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
+  const soundOn = useSpellDuelStore((s) => s.soundOn)
   const completeDuel = useSpellDuelStore((s) => s.completeDuel)
 
   const isExam = focus?.exam === true
@@ -126,6 +128,17 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
     const pending = timers.current
     return () => pending.forEach((t) => window.clearTimeout(t))
   }, [])
+
+  // Each room has its own key; exams run a touch faster. The finale goes
+  // quiet so the fanfare gets the moment to itself.
+  useEffect(() => {
+    if (!soundOn) return
+    if (phase === 'finale') {
+      stopMusic()
+      return
+    }
+    void startMusic(duelTrack(focus?.table ?? null, isExam))
+  }, [soundOn, phase, focus, isExam])
 
   // Pip introduces the Hint Wand once, at the start of her very first duel —
   // the wand is the whole pedagogical point, so it must not go undiscovered.

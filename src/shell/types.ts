@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactElement } from 'react'
 
 /** Contract every playground game implements (PRODUCT.md §7.2). */
 export interface GameDefinition {
@@ -7,11 +7,13 @@ export interface GameDefinition {
   tagline: string
   /** Full-bleed card artwork component (SVG scene). */
   CardArt: ComponentType
-  /** The game itself, mounted full-screen. Must render a HomeButton wired to onExit. */
-  Component: ComponentType<GameProps>
+  /** Root route of the game, e.g. '/spell-duel'. Absent for coming-soon cards. */
+  path?: string
+  /**
+   * The game's <Route> subtree, mounted directly inside the app <Routes>.
+   * Screens use the router (browser back works); every screen still renders
+   * a HomeButton as the visible way up.
+   */
+  routes?: () => ReactElement
   comingSoon?: boolean
-}
-
-export interface GameProps {
-  onExit: () => void
 }

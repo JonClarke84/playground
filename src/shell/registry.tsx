@@ -1,12 +1,8 @@
 import type { GameDefinition } from './types'
-import { SpellDuel } from '../games/spell-duel/SpellDuel'
+import { spellDuelRoutes } from '../games/spell-duel/routes'
 import { SpellDuelCardArt } from './cards/SpellDuelCardArt'
 import { CastleCardArt } from './cards/CastleCardArt'
 import { PopStageCardArt } from './cards/PopStageCardArt'
-
-function ComingSoon() {
-  return null
-}
 
 export const games: GameDefinition[] = [
   {
@@ -14,14 +10,14 @@ export const games: GameDefinition[] = [
     title: 'Spell Duel',
     tagline: 'Out-magic the rival witch',
     CardArt: SpellDuelCardArt,
-    Component: SpellDuel,
+    path: '/spell-duel',
+    routes: spellDuelRoutes,
   },
   {
     id: 'castle-builder',
     title: 'Castle Builder',
     tagline: 'Raise the royal walls',
     CardArt: CastleCardArt,
-    Component: ComingSoon,
     comingSoon: true,
   },
   {
@@ -29,7 +25,6 @@ export const games: GameDefinition[] = [
     title: 'Chart Toppers',
     tagline: 'Light up the big stage',
     CardArt: PopStageCardArt,
-    Component: ComingSoon,
     comingSoon: true,
   },
 ]

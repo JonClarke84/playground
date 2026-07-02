@@ -9,6 +9,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
+      // The Strudel music engine is a large lazy chunk; raise the precache
+      // ceiling so it still works offline.
+      workbox: { maximumFileSizeToCacheInBytes: 6 * 1024 * 1024 },
       manifest: {
         name: 'Playground',
         short_name: 'Playground',
