@@ -224,6 +224,135 @@ export function PonytailFront({ colour }: HairLayerProps) {
   )
 }
 
+export function SpaceBunsBack({ colour }: HairLayerProps) {
+  return (
+    <g>
+      {/* Nape fill + short loose sides */}
+      <ellipse cx="120" cy="138" rx="44" ry="34" fill={colour.base} />
+      <path d="M 62 108 C 56 128 58 148 68 160 C 76 150 76 130 72 110 Z" fill={colour.base} />
+      <path d="M 178 108 C 184 128 182 148 172 160 C 164 150 164 130 168 110 Z" fill={colour.base} />
+      <path d="M 62 108 C 58 124 59 140 66 152 C 67 138 68 122 70 110 Z" fill={colour.shade} opacity="0.55" />
+      <path d="M 178 108 C 182 124 181 140 174 152 C 173 138 172 122 170 110 Z" fill={colour.shade} opacity="0.55" />
+    </g>
+  )
+}
+
+export function SpaceBunsFront({ colour }: HairLayerProps) {
+  return (
+    <g>
+      {/* Two round buns set high on the head */}
+      <circle cx="70" cy="58" r="20" fill={colour.base} />
+      <circle cx="170" cy="58" r="20" fill={colour.base} />
+      <path d="M 54 58 A 20 20 0 0 0 86 58 A 25 15 0 0 1 54 58 Z" fill={colour.shade} opacity="0.6" />
+      <path d="M 154 58 A 20 20 0 0 0 186 58 A 25 15 0 0 1 154 58 Z" fill={colour.shade} opacity="0.6" />
+      {/* Neat fringe joining the buns to the hairline */}
+      <path
+        d="M 67 106 C 68 76 92 60 120 60 C 148 60 172 76 173 106
+           C 162 90 150 82 138 80 Q 144 90 139 98
+           C 129 86 116 82 104 86 Q 106 96 100 102
+           C 92 94 78 96 67 106 Z"
+        fill={colour.base}
+      />
+    </g>
+  )
+}
+
+export function CrownBraidBack({ colour }: HairLayerProps) {
+  return (
+    <g>
+      {/* Shoulder-length fall behind the head */}
+      <path
+        d="M 120 58 C 72 58 56 100 58 142 C 60 174 54 200 46 214
+           C 66 226 86 220 96 208 Q 120 198 144 208
+           C 154 220 174 226 194 214 C 186 200 180 174 182 142
+           C 184 100 168 58 120 58 Z"
+        fill={colour.base}
+      />
+      <path
+        d="M 58 142 C 60 174 54 200 46 214 C 56 220 66 220 74 216
+           C 68 196 68 170 70 146 C 71 122 78 96 94 78 C 70 90 56 114 58 142 Z"
+        fill={colour.shade}
+        opacity="0.5"
+      />
+      <path
+        d="M 182 142 C 180 174 186 200 194 214 C 184 220 174 220 166 216
+           C 172 196 172 170 170 146 C 169 122 162 96 146 78 C 170 90 184 114 182 142 Z"
+        fill={colour.shade}
+        opacity="0.5"
+      />
+    </g>
+  )
+}
+
+export function CrownBraidFront({ colour }: HairLayerProps) {
+  return (
+    <g>
+      {/* Base fringe at the hairline */}
+      <path
+        d="M 67 104 C 68 74 92 58 120 58 C 148 58 172 74 173 104
+           C 162 90 150 82 138 80 Q 144 90 139 98
+           C 129 86 116 82 104 86 Q 106 96 100 102
+           C 92 94 78 96 67 104 Z"
+        fill={colour.base}
+      />
+      {/* Thick braid wrapped across the crown */}
+      <path
+        d="M 62 78 Q 120 46 178 78 Q 174 88 164 84 Q 120 62 76 84 Q 66 88 62 78 Z"
+        fill={colour.base}
+      />
+      {/* Braid twist segments */}
+      {[74, 96, 118, 140, 162].map((x, i) => (
+        <ellipse
+          key={x}
+          cx={x}
+          cy={i % 2 === 0 ? 72 : 66}
+          rx="9"
+          ry="7"
+          fill={colour.shade}
+          opacity="0.5"
+        />
+      ))}
+    </g>
+  )
+}
+
+export function FringeBack({ colour }: HairLayerProps) {
+  return (
+    <g>
+      {/* Long straight hair falling past the shoulders */}
+      <path
+        d="M 120 56 C 66 56 52 100 55 146 C 57 182 50 224 44 252
+           C 64 264 84 258 92 246 Q 116 236 120 236 Q 124 236 148 246
+           C 156 258 176 264 196 252 C 190 224 183 182 185 146
+           C 188 100 174 56 120 56 Z"
+        fill={colour.base}
+      />
+      <path
+        d="M 55 146 C 57 182 50 224 44 252 C 54 258 64 259 72 256
+           C 66 230 66 194 68 156 C 69 126 76 94 94 74 C 68 86 53 114 55 146 Z"
+        fill={colour.shade}
+        opacity="0.5"
+      />
+      <path
+        d="M 185 146 C 183 182 190 224 196 252 C 186 258 176 259 168 256
+           C 174 230 174 194 172 156 C 171 126 164 94 146 74 C 172 86 187 114 185 146 Z"
+        fill={colour.shade}
+        opacity="0.5"
+      />
+    </g>
+  )
+}
+
+export function FringeFront({ colour }: HairLayerProps) {
+  return (
+    <path
+      d="M 67 108 C 68 72 92 56 120 56 C 148 56 172 72 173 108
+         L 173 100 Q 158 84 120 84 Q 82 84 67 100 Z"
+      fill={colour.base}
+    />
+  )
+}
+
 interface HairStyle {
   Back: ComponentType<HairLayerProps> | null
   Front: ComponentType<HairLayerProps> | null
@@ -237,4 +366,7 @@ export const HAIR_REGISTRY: Record<HairStyleId, HairStyle> = {
   bob: { Back: BobBack, Front: BobFront },
   curls: { Back: CurlsBack, Front: CurlsFront },
   ponytail: { Back: PonytailBack, Front: PonytailFront },
+  spacebuns: { Back: SpaceBunsBack, Front: SpaceBunsFront },
+  crownbraid: { Back: CrownBraidBack, Front: CrownBraidFront },
+  fringe: { Back: FringeBack, Front: FringeFront },
 }

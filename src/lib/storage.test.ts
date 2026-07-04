@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   createStore,
   exportAll,
+  flushAllStores,
   importAll,
+  rotateBackups,
   SAVE_DEBOUNCE_MS,
   type StoreDefinition,
 } from './storage'
@@ -225,6 +227,74 @@ describe('createStore: save() debounce', () => {
     if (raw === null) throw new Error('unreachable')
     expect(JSON.parse(raw)).toMatchObject({ data: { count: 9, label: 'settled' } })
   })
+
+  it('flushes a pending debounced write when document becomes hidden', () => {
+    const store = createStore(defineWidgetStore())
+    store.save({ count: 4, label: 'hide-me' })
+    expect(localStorage.getItem(KEY)).toBeNull()
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => 'hidden',
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+    const raw = localStorage.getItem(KEY)
+    expect(raw).not.toBeNull()
+    if (raw === null) throw new Error('unreachable')
+    expect(JSON.parse(raw)).toMatchObject({ data: { count: 4, label: 'hide-me' } })
+  })
+
+  it('visibilitychange is a no-op when the document becomes visible (not hidden)', () => {
+    const store = createStore(defineWidgetStore())
+    store.save({ count: 5, label: 'still-pending' })
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => 'visible',
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(localStorage.getItem(KEY)).toBeNull()
+    vi.advanceTimersByTime(SAVE_DEBOUNCE_MS)
+    const raw = localStorage.getItem(KEY)
+    if (raw === null) throw new Error('unreachable')
+    expect(JSON.parse(raw)).toMatchObject({ data: { count: 5, label: 'still-pending' } })
+  })
+
+  it('flushAllStores immediately writes pending saves across multiple stores', () => {
+    interface OtherWidget {
+      total: number
+    }
+    const store = createStore(defineWidgetStore())
+    const otherStore = createStore<OtherWidget>({
+      key: 'playground:test-other-widget',
+      version: 1,
+      defaults: { total: 0 },
+    })
+
+    store.save({ count: 6, label: 'flush-all-1' })
+    otherStore.save({ total: 42 })
+    expect(localStorage.getItem(KEY)).toBeNull()
+    expect(localStorage.getItem('playground:test-other-widget')).toBeNull()
+
+    flushAllStores()
+
+    const raw = localStorage.getItem(KEY)
+    const otherRaw = localStorage.getItem('playground:test-other-widget')
+    expect(raw).not.toBeNull()
+    expect(otherRaw).not.toBeNull()
+    if (raw === null || otherRaw === null) throw new Error('unreachable')
+    expect(JSON.parse(raw)).toMatchObject({ data: { count: 6, label: 'flush-all-1' } })
+    expect(JSON.parse(otherRaw)).toMatchObject({ data: { total: 42 } })
+
+    localStorage.removeItem('playground:test-other-widget')
+  })
+
+  it('flushAllStores is a no-op when there is nothing pending', () => {
+    const store = createStore(defineWidgetStore())
+    store.saveNow({ count: 9, label: 'already-settled' })
+    expect(() => flushAllStores()).not.toThrow()
+    const raw = localStorage.getItem(KEY)
+    if (raw === null) throw new Error('unreachable')
+    expect(JSON.parse(raw)).toMatchObject({ data: { count: 9, label: 'already-settled' } })
+  })
 })
 
 describe('createStore: clear()', () => {
@@ -348,5 +418,118 @@ describe('exportAll / importAll', () => {
     const result = importAll(JSON.stringify({ [KEY]: { v: 1, data: {} } }))
     expect(result.ok).toBe(false)
     expect(localStorage.getItem(KEY)).toBeNull()
+  })
+})
+
+const META_KEY = 'playground:backup:meta'
+const TWENTY_HOURS_MS = 20 * 60 * 60 * 1000
+
+describe('rotateBackups', () => {
+  it('copies namespaced keys into a slotted backup and advances the slot / meta', () => {
+    localStorage.setItem(KEY, 'value-for-key')
+    localStorage.setItem('playground:other', 'value-for-other')
+
+    rotateBackups()
+
+    expect(localStorage.getItem(`playground:backup:0:${KEY}`)).toBe('value-for-key')
+    expect(localStorage.getItem('playground:backup:0:playground:other')).toBe(
+      'value-for-other',
+    )
+
+    const rawMeta = localStorage.getItem(META_KEY)
+    expect(rawMeta).not.toBeNull()
+    if (rawMeta === null) throw new Error('unreachable')
+    const meta: unknown = JSON.parse(rawMeta)
+    if (typeof meta !== 'object' || meta === null || !('slot' in meta) || !('at' in meta)) {
+      throw new Error('meta should be an object with slot and at')
+    }
+    expect(meta.slot).toBe(1)
+    expect(typeof meta.at).toBe('number')
+  })
+
+  it('cycles the slot through 0, 1, 2 and back to 0', () => {
+    localStorage.setItem(KEY, 'v0')
+    rotateBackups()
+    expect(JSON.parse(localStorage.getItem(META_KEY) ?? '{}')).toMatchObject({ slot: 1 })
+
+    localStorage.setItem(META_KEY, JSON.stringify({ slot: 1, at: 0 }))
+    localStorage.setItem(KEY, 'v1')
+    rotateBackups()
+    expect(localStorage.getItem(`playground:backup:1:${KEY}`)).toBe('v1')
+    expect(JSON.parse(localStorage.getItem(META_KEY) ?? '{}')).toMatchObject({ slot: 2 })
+
+    localStorage.setItem(META_KEY, JSON.stringify({ slot: 2, at: 0 }))
+    localStorage.setItem(KEY, 'v2')
+    rotateBackups()
+    expect(localStorage.getItem(`playground:backup:2:${KEY}`)).toBe('v2')
+    expect(JSON.parse(localStorage.getItem(META_KEY) ?? '{}')).toMatchObject({ slot: 0 })
+  })
+
+  it('does not touch playground:backup: keys as rotation sources', () => {
+    localStorage.setItem(KEY, 'real-value')
+    rotateBackups()
+    // Force a second rotation regardless of freshness to inspect what got copied.
+    localStorage.setItem(META_KEY, JSON.stringify({ slot: 1, at: 0 }))
+    rotateBackups()
+    // The slot-0 backup written by the first rotation must not itself have been
+    // re-copied into a new "playground:backup:0:playground:backup:..." key.
+    const keys: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k !== null) keys.push(k)
+    }
+    expect(keys.some((k) => k.includes('backup:1:playground:backup'))).toBe(false)
+  })
+
+  it('skips rotation entirely when existing meta.at is younger than 20 hours', () => {
+    const recentAt = Date.now() - (TWENTY_HOURS_MS - 60_000)
+    localStorage.setItem(META_KEY, JSON.stringify({ slot: 0, at: recentAt }))
+    localStorage.setItem(KEY, 'should-not-be-copied')
+
+    rotateBackups()
+
+    expect(localStorage.getItem(`playground:backup:0:${KEY}`)).toBeNull()
+    expect(JSON.parse(localStorage.getItem(META_KEY) ?? '{}')).toMatchObject({
+      slot: 0,
+      at: recentAt,
+    })
+  })
+
+  it('rotates when existing meta.at is 20 hours old or older', () => {
+    const oldAt = Date.now() - (TWENTY_HOURS_MS + 60_000)
+    localStorage.setItem(META_KEY, JSON.stringify({ slot: 0, at: oldAt }))
+    localStorage.setItem(KEY, 'should-be-copied')
+
+    rotateBackups()
+
+    expect(localStorage.getItem(`playground:backup:0:${KEY}`)).toBe('should-be-copied')
+    const meta: unknown = JSON.parse(localStorage.getItem(META_KEY) ?? '{}')
+    expect(meta).toMatchObject({ slot: 1 })
+    if (typeof meta !== 'object' || meta === null || !('at' in meta)) {
+      throw new Error('meta should have at')
+    }
+    expect(meta.at).not.toBe(oldAt)
+  })
+
+  it('recovers from corrupt meta by rotating as if starting fresh', () => {
+    localStorage.setItem(META_KEY, 'not json{{{')
+    localStorage.setItem(KEY, 'value-after-corrupt-meta')
+
+    expect(() => rotateBackups()).not.toThrow()
+
+    expect(localStorage.getItem(`playground:backup:0:${KEY}`)).toBe('value-after-corrupt-meta')
+    const meta: unknown = JSON.parse(localStorage.getItem(META_KEY) ?? '{}')
+    expect(meta).toMatchObject({ slot: 1 })
+  })
+
+  it('recovers from meta with the wrong shape by rotating as if starting fresh', () => {
+    localStorage.setItem(META_KEY, JSON.stringify({ nope: true }))
+    localStorage.setItem(KEY, 'value-after-bad-shape-meta')
+
+    expect(() => rotateBackups()).not.toThrow()
+
+    expect(localStorage.getItem(`playground:backup:0:${KEY}`)).toBe(
+      'value-after-bad-shape-meta',
+    )
   })
 })

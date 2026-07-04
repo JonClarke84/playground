@@ -135,6 +135,115 @@ export function Pendant() {
   )
 }
 
+export function StarWand() {
+  return (
+    <g>
+      <line
+        x1="172"
+        y1="238"
+        x2="204"
+        y2="172"
+        stroke="#8b5a2b"
+        strokeWidth="5.5"
+        strokeLinecap="round"
+      />
+      <circle cx="207" cy="166" r="16" fill="var(--gold-glow)" opacity="0.5" />
+      <path
+        d="M 207 152 L 211 162 L 221 166 L 211 170 L 207 180 L 203 170 L 193 166 L 203 162 Z"
+        fill="var(--gold-400)"
+      />
+    </g>
+  )
+}
+
+export function MoonWand() {
+  return (
+    <g>
+      <line
+        x1="172"
+        y1="238"
+        x2="204"
+        y2="172"
+        stroke="#8b5a2b"
+        strokeWidth="5.5"
+        strokeLinecap="round"
+      />
+      <circle cx="207" cy="166" r="16" fill="var(--gold-glow)" opacity="0.5" />
+      {/* Glowing crescent moon head */}
+      <path
+        d="M 214 152 a 15 15 0 1 0 3 27 a 11.5 11.5 0 1 1 -3 -27 Z"
+        fill="var(--gold-400)"
+      />
+    </g>
+  )
+}
+
+export function HeartWand() {
+  return (
+    <g>
+      <line
+        x1="172"
+        y1="238"
+        x2="204"
+        y2="172"
+        stroke="#8b5a2b"
+        strokeWidth="5.5"
+        strokeLinecap="round"
+      />
+      <circle cx="207" cy="166" r="16" fill="var(--pink-glow)" opacity="0.5" />
+      {/* Glowing heart head */}
+      <path
+        d="M 207 178 C 193 168 193 154 203 152 C 207 151 207 156 207 158
+           C 207 156 207 151 211 152 C 221 154 221 168 207 178 Z"
+        fill="var(--pink-400)"
+      />
+    </g>
+  )
+}
+
+export function Bunny() {
+  return (
+    <g>
+      {/* Sitting rabbit companion at the cat's ground spot */}
+      {/* Ears — rooted at the top of the head */}
+      <path d="M 195 258 C 190 246 191 230 197 225 C 202 230 203 246 201 259 Z" fill="#fff8f0" />
+      <path d="M 213 258 C 218 246 217 230 211 225 C 206 230 205 246 207 259 Z" fill="#fff8f0" />
+      <path d="M 196.5 256 C 194 246 195 236 198 231 C 200.5 236 200.5 248 199.5 257 Z" fill="var(--pink-400)" />
+      <path d="M 211.5 256 C 214 246 213 236 210 231 C 207.5 236 207.5 248 208.5 257 Z" fill="var(--pink-400)" />
+      {/* Body */}
+      <ellipse cx="204" cy="290" rx="17" ry="14" fill="#fff8f0" />
+      {/* Head */}
+      <circle cx="204" cy="266" r="12" fill="#fff8f0" />
+      {/* Fluffy tail */}
+      <circle cx="222" cy="284" r="6" fill="#fff8f0" />
+      {/* Face */}
+      <circle cx="199.5" cy="265" r="2" fill="#2f2247" />
+      <circle cx="208.5" cy="265" r="2" fill="#2f2247" />
+      <ellipse cx="204" cy="270" rx="2.4" ry="1.8" fill="var(--pink-400)" />
+      {/* Cheeks */}
+      <ellipse cx="196" cy="270" rx="3.2" ry="2.2" fill="var(--pink-400)" opacity="0.5" />
+      <ellipse cx="212" cy="270" rx="3.2" ry="2.2" fill="var(--pink-400)" opacity="0.5" />
+    </g>
+  )
+}
+
+export function CrystalBall() {
+  return (
+    <g>
+      {/* Small stand near the resting hand */}
+      <path d="M 164 244 Q 173 250 182 244 L 180 250 Q 173 254 166 250 Z" fill="var(--gold-600)" />
+      {/* Glow */}
+      <circle cx="173" cy="228" r="20" fill="var(--emerald-glow)" opacity="0.45" />
+      {/* Floating orb */}
+      <circle cx="173" cy="228" r="14" fill="var(--emerald-500)" opacity="0.35" />
+      <circle cx="173" cy="228" r="14" fill="none" stroke="var(--emerald-500)" strokeWidth="1.6" opacity="0.7" />
+      <ellipse cx="168" cy="222" rx="4.5" ry="3" fill="#fff8f0" opacity="0.8" />
+      {/* Sparkle */}
+      <path d="M 186 210 l 1.6 4 l 4 1.6 l -4 1.6 l -1.6 4 l -1.6 -4 l -4 -1.6 l 4 -1.6 Z" fill="var(--gold-400)" />
+    </g>
+  )
+}
+
 /** Registry the avatar composer renders from. Add new accessories here. */
 export const ACCESSORY_REGISTRY: Record<AccessoryId, ComponentType | null> = {
   wand: Wand,
@@ -143,4 +252,9 @@ export const ACCESSORY_REGISTRY: Record<AccessoryId, ComponentType | null> = {
   owl: Owl,
   spellbook: Spellbook,
   pendant: Pendant,
+  starwand: StarWand,
+  moonwand: MoonWand,
+  heartwand: HeartWand,
+  bunny: Bunny,
+  crystalball: CrystalBall,
 }

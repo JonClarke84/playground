@@ -4,6 +4,7 @@ import { HAIR_REGISTRY } from './hair'
 import { HAT_REGISTRY } from './hats'
 import { OUTFIT_REGISTRY } from './outfits'
 import { ACCESSORY_REGISTRY } from './accessories'
+import { EFFECT_REGISTRY } from './effects'
 
 interface WitchAvatarProps {
   config: AvatarConfig
@@ -58,7 +59,7 @@ function Face({ skin, expression }: { skin: SkinTone; expression: Expression }) 
 /**
  * The layered paper-doll witch (PRODUCT.md §4.2).
  * Layer order: back accessory → back hair → boots → outfit → head → face →
- * front hair → hat → front accessory.
+ * front hair → hat → front accessory → effect aura.
  */
 export function WitchAvatar({ config, expression = 'smile', className }: WitchAvatarProps) {
   const skin = skinTone(config.skin)
@@ -68,6 +69,7 @@ export function WitchAvatar({ config, expression = 'smile', className }: WitchAv
   const Outfit = OUTFIT_REGISTRY[config.outfit]
   const Hat = HAT_REGISTRY[config.hat]
   const Accessory = ACCESSORY_REGISTRY[config.accessory]
+  const Effect = EFFECT_REGISTRY[config.effect ?? 'none']
 
   return (
     <svg className={className} viewBox="0 0 240 320" role="img" aria-label="Your witch">
@@ -97,6 +99,9 @@ export function WitchAvatar({ config, expression = 'smile', className }: WitchAv
 
       {/* Front accessory */}
       {Accessory && <Accessory />}
+
+      {/* Effect aura */}
+      {Effect && <Effect />}
     </svg>
   )
 }

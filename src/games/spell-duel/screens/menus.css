@@ -1,0 +1,249 @@
+/* ============ Title screen — beauty pass ============ */
+/* Splash-screen polish for .sd-title / .map. Keep spellDuel.css untouched;
+   these rules layer on top (specificity, not import order, is what wins). */
+
+.sd-title-layout {
+  gap: clamp(20px, 5vw, 80px);
+}
+
+.sd-title-right {
+  gap: 14px;
+}
+
+/* --- Heading: layered gradient text, glow, slow shimmer --- */
+
+.sd-title .sd-title-heading {
+  position: relative;
+  background: linear-gradient(
+    100deg,
+    var(--emerald-500) 0%,
+    var(--gold-400) 45%,
+    var(--emerald-500) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 22px var(--emerald-glow)) drop-shadow(0 0 40px var(--gold-glow));
+  animation: heading-shimmer 6s ease-in-out infinite;
+}
+
+@keyframes heading-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* --- Drifting sparkle dots around the heading --- */
+
+.sd-title-heading-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.sd-title-sparkle {
+  position: absolute;
+  border-radius: var(--radius-round);
+  background: var(--gold-400);
+  box-shadow: 0 0 10px var(--gold-glow);
+  pointer-events: none;
+  opacity: 0;
+  animation: sparkle-drift 5s ease-in-out infinite;
+}
+
+.sd-title-sparkle--1 {
+  width: 6px;
+  height: 6px;
+  top: -14px;
+  left: 8%;
+  animation-delay: 0s;
+}
+
+.sd-title-sparkle--2 {
+  width: 4px;
+  height: 4px;
+  top: 6px;
+  right: 4%;
+  animation-delay: 1.6s;
+}
+
+.sd-title-sparkle--3 {
+  width: 5px;
+  height: 5px;
+  bottom: -10px;
+  left: 46%;
+  animation-delay: 3.1s;
+}
+
+@keyframes sparkle-drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(6px, -10px) scale(1);
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-4px, -18px) scale(0.6);
+  }
+}
+
+/* --- Avatar: gentle float + ground shadow --- */
+
+.sd-title-left {
+  position: relative;
+  gap: 6px;
+}
+
+.sd-title-avatar-float {
+  position: relative;
+  animation: avatar-bob 6s ease-in-out infinite;
+}
+
+.sd-title-avatar-ground {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 62%;
+  height: 22px;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.45), transparent 72%);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: ground-pulse 6s ease-in-out infinite;
+}
+
+@keyframes avatar-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes ground-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.82);
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-title .sd-title-heading,
+  .sd-title-sparkle,
+  .sd-title-avatar-float,
+  .sd-title-avatar-ground {
+    animation: none;
+  }
+}
+
+/* ============ Academy map — beauty pass ============ */
+
+.map-node {
+  animation: node-bob 4.6s ease-in-out infinite;
+}
+
+.map-node--passed {
+  animation:
+    node-bob 4.6s ease-in-out infinite,
+    node-gold-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes node-bob {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 6px));
+  }
+}
+
+@keyframes node-gold-pulse {
+  0%,
+  100% {
+    box-shadow: var(--glow-soft) var(--gold-glow);
+  }
+  50% {
+    box-shadow: var(--glow-strong) var(--gold-glow);
+  }
+}
+
+.map-node:active {
+  animation-play-state: paused;
+}
+
+/* --- Mist for depth --- */
+
+.map-mist {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  filter: blur(28px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.map-mist--1 {
+  left: -6%;
+  width: 46%;
+  height: 90px;
+  background: radial-gradient(50% 50% at 50% 50%, var(--midnight-500), transparent 70%);
+}
+
+.map-mist--2 {
+  right: -8%;
+  width: 54%;
+  height: 110px;
+  background: radial-gradient(50% 50% at 50% 50%, var(--emerald-700), transparent 70%);
+}
+
+/* --- Map sheet: blur + springier entrance (overrides spellDuel.css's sheet-up) --- */
+
+.map .map-sheet {
+  backdrop-filter: blur(6px);
+}
+
+.map .map-sheet-panel {
+  animation: sheet-up-springy var(--duration-slow) var(--ease-pop);
+}
+
+@keyframes sheet-up-springy {
+  from {
+    transform: translateY(70px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-node,
+  .map-node--passed,
+  .map .map-sheet-panel {
+    animation: none;
+  }
+}

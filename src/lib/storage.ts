@@ -4,14 +4,39 @@
  * Every stored blob is wrapped in an envelope `{ v, data }` under a
  * namespaced key (e.g. "playground:spell-duel"). Loads never throw: bad
  * data is stashed under a `:backup` key and defaults are returned instead.
- * Writes are debounced; a 'pagehide' listener flushes any pending write so
- * progress survives closing the tab.
+ * Writes are debounced; module-scope 'pagehide' and 'visibilitychange'
+ * listeners flush every store's pending write so progress survives closing
+ * or backgrounding the tab.
  */
 
 export const SAVE_DEBOUNCE_MS = 300
 
 const BACKUP_SUFFIX = ':backup'
 const NAMESPACE_PREFIX = 'playground:'
+const BACKUP_SLOT_PREFIX = 'playground:backup:'
+const BACKUP_META_KEY = 'playground:backup:meta'
+const BACKUP_SLOT_COUNT = 3
+const BACKUP_ROTATION_INTERVAL_MS = 20 * 60 * 60 * 1000
+
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined'
+
+/** Registry of every store's flush function, so a single listener can flush them all. */
+const allFlushers = new Set<() => void>()
+
+export function flushAllStores(): void {
+  for (const flush of allFlushers) {
+    flush()
+  }
+}
+
+if (isBrowser) {
+  window.addEventListener('pagehide', flushAllStores)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushAllStores()
+    }
+  })
+}
 
 export interface StoreDefinition<T> {
   key: string
@@ -105,7 +130,7 @@ export function createStore<T>(def: StoreDefinition<T>): PersistedStore<T> {
     pending = null
   }
 
-  window.addEventListener('pagehide', flushPending)
+  allFlushers.add(flushPending)
 
   function load(): T {
     const raw = readRaw(def.key)
@@ -217,4 +242,71 @@ export function importAll(json: string): { ok: true } | { ok: false; error: stri
   }
 
   return { ok: true }
+}
+
+interface BackupMeta {
+  slot: number
+  at: number
+}
+
+function isBackupMeta(value: unknown): value is BackupMeta {
+  if (typeof value !== 'object' || value === null) return false
+  if (!hasOwn(value, 'slot') || !hasOwn(value, 'at')) return false
+  return typeof value.slot === 'number' && typeof value.at === 'number'
+}
+
+function readBackupMeta(): BackupMeta | null {
+  const raw = localStorage.getItem(BACKUP_META_KEY)
+  if (raw === null) return null
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    return null
+  }
+  return isBackupMeta(parsed) ? parsed : null
+}
+
+/**
+ * Copies every `playground:`-namespaced key into a rotating backup slot
+ * (`playground:backup:<slot>:<key>`), cycling through `BACKUP_SLOT_COUNT`
+ * slots so recent history survives a bad write without backups growing
+ * unbounded. Runs at most once per `BACKUP_ROTATION_INTERVAL_MS`; corrupt or
+ * missing meta is treated as "never rotated" rather than blocking rotation.
+ */
+export function rotateBackups(): void {
+  const meta = readBackupMeta()
+  if (meta !== null && Date.now() - meta.at < BACKUP_ROTATION_INTERVAL_MS) {
+    return
+  }
+
+  const slot = meta === null ? 0 : meta.slot
+  const keysToBackup: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key === null) continue
+    if (!key.startsWith(NAMESPACE_PREFIX) || key.startsWith(BACKUP_SLOT_PREFIX)) continue
+    keysToBackup.push(key)
+  }
+
+  for (const key of keysToBackup) {
+    const value = localStorage.getItem(key)
+    if (value === null) continue
+    try {
+      localStorage.setItem(`${BACKUP_SLOT_PREFIX}${slot}:${key}`, value)
+    } catch (error) {
+      console.warn(`storage: failed to write rotating backup for "${key}"`, error)
+    }
+  }
+
+  const nextMeta: BackupMeta = { slot: (slot + 1) % BACKUP_SLOT_COUNT, at: Date.now() }
+  try {
+    localStorage.setItem(BACKUP_META_KEY, JSON.stringify(nextMeta))
+  } catch (error) {
+    console.warn('storage: failed to write backup rotation meta', error)
+  }
+}
+
+if (isBrowser) {
+  rotateBackups()
 }

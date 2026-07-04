@@ -7,6 +7,7 @@ import type { AvatarConfig } from '../avatar/avatarTypes'
 import {
   ACCESSORIES,
   DEFAULT_AVATAR,
+  EFFECTS,
   HAIR_COLOURS,
   HAIR_STYLES,
   HATS,
@@ -15,9 +16,17 @@ import {
   SKIN_TONES,
 } from '../avatar/avatarTypes'
 import type { CostumeItem } from '../avatar/unlocks'
-import { lockedItemFor } from '../avatar/unlocks'
+import { isOptionUnlocked, lockedItemFor } from '../avatar/unlocks'
 
-type CategoryId = 'skin' | 'hairStyle' | 'hairColour' | 'hat' | 'outfit' | 'outfitColour' | 'accessory'
+type CategoryId =
+  | 'skin'
+  | 'hairStyle'
+  | 'hairColour'
+  | 'hat'
+  | 'outfit'
+  | 'outfitColour'
+  | 'accessory'
+  | 'effect'
 
 const CATEGORIES: Array<{ id: CategoryId; label: string }> = [
   { id: 'skin', label: 'Skin' },
@@ -27,6 +36,7 @@ const CATEGORIES: Array<{ id: CategoryId; label: string }> = [
   { id: 'outfit', label: 'Outfits' },
   { id: 'outfitColour', label: 'Colours' },
   { id: 'accessory', label: 'Extras' },
+  { id: 'effect', label: 'Sparkle' },
 ]
 
 function randomOf<T>(items: readonly T[]): T {
@@ -72,14 +82,18 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
 
   const surprise = () => {
     sfx.hint()
+    // Only ever dresses her from what she owns — locked pieces stay prizes.
+    const owned = <T extends string>(kind: Parameters<typeof lockedItemFor>[0], pool: readonly T[]) =>
+      randomOf(pool.filter((id) => isOptionUnlocked(unlockedItems, kind, id)))
     setAvatar({
       skin: randomOf(SKIN_TONES).id,
-      hairStyle: randomOf(HAIR_STYLES),
-      hairColour: randomOf(HAIR_COLOURS).id,
-      hat: randomOf(HATS),
-      outfit: randomOf(OUTFITS),
-      outfitColour: randomOf(OUTFIT_COLOURS).id,
-      accessory: randomOf(ACCESSORIES),
+      hairStyle: owned('hairStyle', HAIR_STYLES),
+      hairColour: owned('hairColour', HAIR_COLOURS.map((c) => c.id)),
+      hat: owned('hat', HATS),
+      outfit: owned('outfit', OUTFITS),
+      outfitColour: owned('outfitColour', OUTFIT_COLOURS.map((c) => c.id)),
+      accessory: owned('accessory', ACCESSORIES),
+      effect: owned('effect', EFFECTS),
     })
   }
 
@@ -93,19 +107,27 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
           swatch: tone.base,
         }))
       case 'hairColour':
-        return HAIR_COLOURS.map((colour) => ({
-          key: colour.id,
-          active: avatar.hairColour === colour.id,
-          onPick: () => update({ hairColour: colour.id }),
-          swatch: colour.base,
-        }))
+        return HAIR_COLOURS.map((colour) => {
+          const lock = lockedItemFor('hairColour', colour.id)
+          return {
+            key: colour.id,
+            active: avatar.hairColour === colour.id,
+            onPick: () => pickOrBuy(lock, () => update({ hairColour: colour.id })),
+            swatch: colour.base,
+            lock,
+          }
+        })
       case 'outfitColour':
-        return OUTFIT_COLOURS.map((colour) => ({
-          key: colour.id,
-          active: avatar.outfitColour === colour.id,
-          onPick: () => update({ outfitColour: colour.id }),
-          swatch: colour.base,
-        }))
+        return OUTFIT_COLOURS.map((colour) => {
+          const lock = lockedItemFor('outfitColour', colour.id)
+          return {
+            key: colour.id,
+            active: avatar.outfitColour === colour.id,
+            onPick: () => pickOrBuy(lock, () => update({ outfitColour: colour.id })),
+            swatch: colour.base,
+            lock,
+          }
+        })
       case 'hairStyle':
         return HAIR_STYLES.map((id) => {
           const lock = lockedItemFor('hairStyle', id)
@@ -147,6 +169,17 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
             active: avatar.accessory === id,
             onPick: () => pickOrBuy(lock, () => update({ accessory: id })),
             preview: { ...avatar, accessory: id },
+            lock,
+          }
+        })
+      case 'effect':
+        return EFFECTS.map((id) => {
+          const lock = lockedItemFor('effect', id)
+          return {
+            key: id,
+            active: avatar.effect === id,
+            onPick: () => pickOrBuy(lock, () => update({ effect: id })),
+            preview: { ...avatar, effect: id },
             lock,
           }
         })

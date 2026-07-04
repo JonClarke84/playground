@@ -212,6 +212,111 @@ export function RobeOutfit({ colour, skin }: OutfitProps) {
   )
 }
 
+/** Deep midnight dress scattered with stars; fixed dark fills so stars always pop. */
+export function GalaxyOutfit({ colour, skin }: OutfitProps) {
+  const stars: Array<[number, number, number]> = [
+    [96, 202, 2.6], [140, 196, 2], [108, 222, 1.8], [132, 232, 2.4],
+    [90, 244, 2], [150, 252, 2.6], [120, 210, 1.6], [100, 266, 2.2],
+    [142, 270, 1.8], [116, 250, 2],
+  ]
+  return (
+    <g>
+      <path
+        d="M 120 164 C 98 164 86 176 82 194 L 62 274 Q 120 296 178 274 L 158 194
+           C 154 176 142 164 120 164 Z"
+        fill="#1a1140"
+      />
+      {/* Crescent hem trim */}
+      <path
+        d="M 68 258 Q 120 280 172 258 L 178 274 Q 120 296 62 274 Z"
+        fill="#0e0722"
+      />
+      {stars.map(([x, y, r], i) => (
+        <path
+          key={i}
+          d={`M ${x} ${y - r * 2} L ${x + r * 0.6} ${y - r * 0.6} L ${x + r * 2} ${y}
+             L ${x + r * 0.6} ${y + r * 0.6} L ${x} ${y + r * 2} L ${x - r * 0.6} ${y + r * 0.6}
+             L ${x - r * 2} ${y} L ${x - r * 0.6} ${y - r * 0.6} Z`}
+          fill={i % 3 === 0 ? '#fff8f0' : 'var(--gold-400)'}
+        />
+      ))}
+      {/* Crescent moon accent, tinted with colour param */}
+      <path d="M 120 178 a 9 9 0 1 0 6 16 a 7 7 0 1 1 -6 -16 Z" fill={colour.light} />
+      <Sleeves colour={{ ...colour, dark: '#1a1140' }} skin={skin} />
+    </g>
+  )
+}
+
+/** Ballet-style bodice with a fitted top and three-layer stiff tutu skirt. */
+export function TutuOutfit({ colour, skin }: OutfitProps) {
+  const layer = (y: number, halfWidth: number, fill: string) => (
+    <path
+      d={`M ${120 - halfWidth} ${y} Q 120 ${y + 14} ${120 + halfWidth} ${y}
+         L ${120 + halfWidth - 6} ${y - 24} Q 120 ${y - 34} ${120 - halfWidth + 6} ${y - 24} Z`}
+      fill={fill}
+    />
+  )
+  return (
+    <g>
+      {layer(272, 62, colour.dark)}
+      {layer(250, 50, colour.base)}
+      {layer(230, 40, colour.light)}
+      {/* Fitted bodice */}
+      <path
+        d="M 120 164 C 104 164 94 174 90 190 L 88 208 Q 120 218 152 208 L 150 190
+           C 146 174 136 164 120 164 Z"
+        fill={colour.base}
+      />
+      <path d="M 120 164 C 112 164 106 168 102 176 L 120 208 L 138 176 C 134 168 128 164 120 164 Z" fill={colour.light} opacity="0.5" />
+      <Sleeves colour={colour} skin={skin} />
+    </g>
+  )
+}
+
+/** Floor-length gown with a gold sash across the bodice and hem trim. */
+export function RegalOutfit({ colour, skin }: OutfitProps) {
+  return (
+    <g>
+      <path
+        d="M 120 164 C 98 164 88 176 84 196 L 64 288 Q 120 306 176 288 L 156 196
+           C 152 176 142 164 120 164 Z"
+        fill={colour.base}
+      />
+      {/* Hem trim */}
+      <path d="M 68 270 Q 120 290 172 270 L 176 288 Q 120 306 64 288 Z" fill="var(--gold-500)" />
+      <Sleeves colour={colour} skin={skin} />
+      {/* Gold sash across the bodice */}
+      <path d="M 92 172 L 148 172 L 138 200 L 102 200 Z" fill="var(--gold-500)" />
+      <path d="M 92 172 L 148 172 L 145 180 L 95 180 Z" fill="var(--gold-400)" />
+      {/* Sash clasp */}
+      <circle cx="120" cy="192" r="5" fill="var(--gold-600)" />
+    </g>
+  )
+}
+
+/** Asymmetric long coat with jagged lightning-bolt trim and a high collar. */
+export function StormOutfit({ colour, skin }: OutfitProps) {
+  return (
+    <g>
+      <path
+        d="M 120 164 C 100 164 88 178 84 198 L 68 282 Q 96 292 120 286
+           L 132 198 Q 150 260 156 284 Q 176 288 172 268 L 156 198
+           C 152 178 140 164 120 164 Z"
+        fill={colour.base}
+      />
+      {/* Jagged lightning-bolt gold trim down the front */}
+      <path
+        d="M 122 172 L 112 208 L 122 208 L 108 250 L 128 214 L 118 214 L 128 172 Z"
+        fill="var(--gold-500)"
+      />
+      {/* High collar */}
+      <path d="M 100 166 L 120 190 L 106 200 L 90 174 Z" fill={colour.dark} />
+      <path d="M 140 166 L 120 190 L 134 200 L 150 174 Z" fill={colour.dark} />
+      <Sleeves colour={colour} skin={skin} />
+    </g>
+  )
+}
+
 /** Registry the avatar composer renders from. Add new outfits here. */
 export const OUTFIT_REGISTRY: Record<OutfitId, ComponentType<OutfitProps>> = {
   academy: AcademyOutfit,
@@ -220,4 +325,8 @@ export const OUTFIT_REGISTRY: Record<OutfitId, ComponentType<OutfitProps>> = {
   coat: CoatOutfit,
   jumpsuit: JumpsuitOutfit,
   robe: RobeOutfit,
+  galaxy: GalaxyOutfit,
+  tutu: TutuOutfit,
+  regal: RegalOutfit,
+  storm: StormOutfit,
 }

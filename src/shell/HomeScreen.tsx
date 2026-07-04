@@ -32,10 +32,11 @@ export function HomeScreen({ games, onLaunch }: HomeScreenProps) {
         <h1 className="home-title">Playground</h1>
       </header>
       <div className="home-cards">
-        {games.map((game) => (
+        {games.map((game, i) => (
           <button
             key={game.id}
             className={`game-card${game.comingSoon ? ' game-card--locked' : ''}`}
+            style={{ animationDelay: `${i * 0.08}s` }}
             onClick={game.comingSoon ? undefined : () => onLaunch(game.id)}
             disabled={game.comingSoon}
             aria-label={game.comingSoon ? `${game.title} — coming soon` : `Play ${game.title}`}
