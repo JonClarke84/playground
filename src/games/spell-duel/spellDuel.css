@@ -297,6 +297,30 @@
   height: 100%;
 }
 
+.duel-backdrop--raster {
+  object-fit: cover;
+}
+
+.boss-raster {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.boss-raster--shocked {
+  animation: boss-flinch 0.55s var(--ease-pop);
+}
+
+@keyframes boss-flinch {
+  0% { transform: rotate(0) scale(1); }
+  30% { transform: rotate(-7deg) scale(0.94) translateY(-8px); }
+  100% { transform: rotate(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boss-raster--shocked { animation: none; }
+}
+
 .hall-candle {
   animation: candle-bob 4s ease-in-out infinite;
 }
@@ -335,10 +359,41 @@
   z-index: 10;
 }
 
+.duel-top-meter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.combo-badge {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gold-400);
+  text-shadow: 0 0 12px var(--gold-glow);
+  filter: drop-shadow(0 0 8px var(--gold-glow));
+  animation: combo-pop var(--duration-base) var(--ease-pop);
+}
+
+@keyframes combo-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .combo-badge {
+    animation: none;
+  }
+}
+
 .duel-round-label {
   font-family: var(--font-display);
   font-size: 15px;
-  color: var(--text-dim);
+  color: var(--text-bright);
+  padding: 3px 14px;
+  border-radius: var(--radius-round);
+  background: rgba(14, 7, 34, 0.6);
 }
 
 .magic-meter {
@@ -398,6 +453,11 @@
   animation: rival-hit 0.6s var(--ease-pop);
 }
 
+/* Comic boss defeat — spin and fly off screen once the finale lands. */
+.duel-rival-art--defeated {
+  animation: rival-defeated 1.2s var(--ease-smooth) forwards;
+}
+
 @keyframes rival-bob {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
   50% { transform: translateY(-14px) rotate(2deg); }
@@ -407,6 +467,23 @@
   0% { transform: translateY(0) rotate(0); }
   30% { transform: translateY(-20px) rotate(9deg) scale(0.96); }
   100% { transform: translateY(0) rotate(0); }
+}
+
+@keyframes rival-defeated {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  70% { transform: translate(60px, -140px) rotate(540deg) scale(0.85); opacity: 1; }
+  100% { transform: translate(140px, -420px) rotate(720deg) scale(0.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duel-rival-art--defeated {
+    animation: rival-defeated-reduced 0.6s var(--ease-smooth) forwards;
+  }
+}
+
+@keyframes rival-defeated-reduced {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .speech {
@@ -843,6 +920,29 @@
   to { opacity: 1; }
 }
 
+.finale-rays {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-conic-gradient(
+    var(--gold-400) 0deg 6deg,
+    transparent 6deg 18deg
+  );
+  animation: finale-rays-spin 30s linear infinite;
+}
+
+@keyframes finale-rays-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finale-rays {
+    animation: none;
+  }
+}
+
 .finale-avatar {
   width: clamp(180px, 20vw, 260px);
   animation: finale-dance 1.6s var(--ease-pop) infinite;
@@ -876,6 +976,14 @@
 .finale-actions {
   display: flex;
   gap: 18px;
+}
+
+.finale-practise {
+  margin: -6px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  opacity: 0.7;
 }
 
 .finale-reward {
@@ -1033,6 +1141,14 @@
   font-weight: 700;
 }
 
+.map-sheet-bio {
+  margin: 0;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--text-dim);
+  opacity: 0.85;
+}
+
 .map-sheet-actions {
   display: flex;
   gap: 14px;
@@ -1178,10 +1294,171 @@
 }
 
 .duel-rival-name {
-  width: 100%;
+  align-self: center;
   text-align: center;
   font-family: var(--font-display);
   font-size: 17px;
+  color: var(--text-bright);
+  padding: 2px 14px;
+  border-radius: var(--radius-round);
+  background: rgba(14, 7, 34, 0.6);
+}
+
+/* ============ Who's Who ============ */
+
+.characters {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 24px 48px;
+  background:
+    radial-gradient(110% 80% at 50% -10%, var(--midnight-600) 0%, transparent 60%),
+    linear-gradient(180deg, var(--midnight-800), var(--midnight-900));
+}
+
+.characters-title {
+  text-align: center;
+  margin: 0 0 28px;
+  font-size: clamp(28px, 3.4vw, 42px);
+  text-shadow: 0 0 26px var(--gold-glow);
+}
+
+.characters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.character-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 28px;
+  border-radius: var(--radius-lg);
+  background: var(--midnight-700);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 32px rgba(183, 139, 255, 0.08);
+  opacity: 0;
+  animation: character-card-in var(--duration-slow) var(--ease-pop) both;
+}
+
+.character-card--right {
+  flex-direction: row-reverse;
+}
+
+.character-card-portrait {
+  flex: none;
+  width: clamp(200px, 22vw, 260px);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.character-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.character-card--right .character-card-body {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.character-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.character-card--right .character-card-heading {
+  justify-content: flex-end;
+}
+
+.character-card-name {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 32px);
+  color: var(--gold-400);
+  text-shadow: 0 0 18px var(--gold-glow);
+}
+
+.character-card-defeated {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-on-light);
+  background: var(--gold-500);
+  padding: 4px 14px;
+  border-radius: var(--radius-round);
+  white-space: nowrap;
+}
+
+.character-card-meta {
+  margin: 0;
+  font-weight: 800;
   color: var(--text-dim);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.character-card-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 12px;
+  border-radius: var(--radius-round);
+  background: var(--midnight-600);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.character-card-story {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+@keyframes character-card-in {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .character-card,
+  .character-card--right {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .character-card-body,
+  .character-card--right .character-card-body {
+    align-items: center;
+    text-align: center;
+  }
+
+  .character-card-heading,
+  .character-card--right .character-card-heading {
+    justify-content: center;
+  }
+
+  .character-card-portrait {
+    width: clamp(180px, 60vw, 220px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-card {
+    animation: none;
+    opacity: 1;
+  }
 }
