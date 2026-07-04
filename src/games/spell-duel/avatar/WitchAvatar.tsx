@@ -74,8 +74,12 @@ export function WitchAvatar({ config, expression = 'smile', className }: WitchAv
   return (
     <svg className={className} viewBox="0 0 240 320" role="img" aria-label="Your witch">
       <defs>
-        <filter id="wa-soft" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="14" />
+        {/* Silhouette-bound painted lighting: warm rim top-left, cool rim
+            bottom-right. Derived from her alpha, so it can never spill
+            outside the figure (no square wash over painted scenes). */}
+        <filter id="wa-light" x="-25%" y="-25%" width="150%" height="150%">
+          <feDropShadow dx="-5" dy="-7" stdDeviation="6" floodColor="#ffe9b3" floodOpacity="0.4" />
+          <feDropShadow dx="6" dy="8" stdDeviation="8" floodColor="#1a0f38" floodOpacity="0.4" />
         </filter>
         <radialGradient id="wa-disc">
           <stop offset="0" stopColor="#ffd166" stopOpacity="0.55" />
@@ -87,6 +91,7 @@ export function WitchAvatar({ config, expression = 'smile', className }: WitchAv
       {/* Painted-style ground glow, matching the boss portraits' staging */}
       <ellipse cx="120" cy="303" rx="78" ry="14" fill="url(#wa-disc)" />
 
+      <g filter="url(#wa-light)">
       {/* Back hair */}
       {hairLayers.Back && <hairLayers.Back colour={hair} />}
 
@@ -113,22 +118,6 @@ export function WitchAvatar({ config, expression = 'smile', className }: WitchAv
 
       {/* Front accessory */}
       {Accessory && <Accessory />}
-
-      {/* Painted-style lighting: warm key top-left, cool shade bottom-right.
-          Blend modes act only on the artwork beneath within this svg. */}
-      <g pointerEvents="none">
-        <ellipse
-          cx="78" cy="86" rx="95" ry="110"
-          fill="#ffe9b3" opacity="0.30"
-          filter="url(#wa-soft)"
-          style={{ mixBlendMode: 'soft-light' }}
-        />
-        <ellipse
-          cx="178" cy="240" rx="105" ry="120"
-          fill="#2c1a52" opacity="0.24"
-          filter="url(#wa-soft)"
-          style={{ mixBlendMode: 'multiply' }}
-        />
       </g>
 
       {/* Effect aura */}

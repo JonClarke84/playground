@@ -445,8 +445,18 @@
 }
 
 .duel-rival-art {
-  width: clamp(160px, 18vw, 240px);
-  animation: rival-bob 3.4s ease-in-out infinite;
+  width: clamp(200px, 23vw, 310px);
+  animation: rival-weave 5.4s ease-in-out infinite;
+}
+
+/* Weaving hover — she's dodging incoming magic. */
+@keyframes rival-weave {
+  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+  18% { transform: translate(-12px, -16px) rotate(-5deg); }
+  38% { transform: translate(6px, -6px) rotate(1deg); }
+  55% { transform: translate(-6px, -22px) rotate(3deg); }
+  74% { transform: translate(10px, -10px) rotate(-1deg); }
+  88% { transform: translate(-4px, -4px) rotate(-3deg); }
 }
 
 .duel-rival-art--hit {
@@ -714,9 +724,26 @@
   position: absolute;
   left: clamp(10px, 2.5vw, 48px);
   bottom: clamp(64px, 11vh, 116px);
-  width: clamp(170px, 19vw, 260px);
+  width: clamp(210px, 24vw, 330px);
   z-index: 9;
-  animation: pip-bob 3.2s ease-in-out infinite;
+  animation: hero-weave 4.6s ease-in-out infinite;
+}
+
+/* Her own bob-and-weave, out of phase with the rival's. */
+@keyframes hero-weave {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  22% { transform: translate(8px, -12px) rotate(2deg); }
+  45% { transform: translate(-6px, -4px) rotate(-2deg); }
+  64% { transform: translate(10px, -18px) rotate(1deg); }
+  84% { transform: translate(-4px, -8px) rotate(-1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .duel-rival-art,
+  .duel-hero,
+  .duel-pip-art {
+    animation: none;
+  }
 }
 
 .duel-hero--cast {
@@ -740,7 +767,7 @@
 }
 
 .duel-pip-art {
-  width: clamp(110px, 12vw, 160px);
+  width: clamp(130px, 14vw, 185px);
   animation: pip-bob 2.8s ease-in-out infinite;
 }
 
