@@ -10,6 +10,7 @@ import { DuelScreen } from './screens/DuelScreen'
 import { MapScreen } from './screens/MapScreen'
 import { SpellbookScreen } from './screens/SpellbookScreen'
 import { CharactersScreen } from './screens/CharactersScreen'
+import { SoundToggle } from './components/SoundToggle'
 import './spellDuel.css'
 
 /**
@@ -56,7 +57,12 @@ function SpellDuelLayout() {
     return <Navigate to="/spell-duel/dressing-room" replace />
   }
 
-  return <Outlet />
+  return (
+    <>
+      <SoundToggle />
+      <Outlet />
+    </>
+  )
 }
 
 function TitleRoute() {

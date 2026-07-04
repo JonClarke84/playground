@@ -28,8 +28,6 @@ export function TitleScreen({
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
   const tables = useSpellDuelStore((s) => s.tables)
   const toggleTable = useSpellDuelStore((s) => s.toggleTable)
-  const soundOn = useSpellDuelStore((s) => s.soundOn)
-  const toggleSound = useSpellDuelStore((s) => s.toggleSound)
   const sparkleDust = useSpellDuelStore((s) => s.sparkleDust)
 
   return (
@@ -37,16 +35,6 @@ export function TitleScreen({
       <StarField seed={23} />
       <HomeButton onExit={onExit} />
 
-      <button
-        className="sound-toggle"
-        onClick={() => {
-          toggleSound()
-          sfx.tap()
-        }}
-        aria-label={soundOn ? 'Turn sound off' : 'Turn sound on'}
-      >
-        {soundOn ? '🔊' : '🔇'}
-      </button>
 
       <div className="sd-title-layout">
         <div className="sd-title-left">
