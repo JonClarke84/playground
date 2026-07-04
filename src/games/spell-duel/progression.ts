@@ -33,6 +33,23 @@ export interface Boss {
   palette: RivalPalette
   emblem: BossEmblem
   companion: BossCompanion
+  /** One-line backstory, shown on the map sheet before the duel. */
+  bio?: string
+}
+
+/** Backstories — each boss's bespoke portrait leans into these. */
+export const BOSS_BIOS: Record<number, string> = {
+  2: 'Head Prefect of Mischief — hides comics inside her spellbooks.',
+  3: 'Raised by talking brambles. Speaks fluent Plant.',
+  4: 'Delivers the night post til dawn — hasn’t slept since Tuesday.',
+  5: 'Potion prodigy. Her fringe is permanently singed.',
+  6: 'Sleeps all day, names constellations all night.',
+  7: 'Head girl. Collects trophies and never loses her mirror.',
+  8: 'Three-time Midnight Cup champion. Crashes spectacularly.',
+  9: 'Winds every academy clock at dawn. Never once late.',
+  10: 'Keeps the dragon-hoard ledgers. Counts coins in her sleep.',
+  11: 'Enchanted her hairbrush into a microphone. Practises encores at midnight.',
+  12: 'Head of the secret Midnight Racing Club. Bottles lightning for fun.',
 }
 
 export type SceneVariant =
@@ -311,6 +328,25 @@ export const MAP_LOCATIONS: MapLocation[] = [
     ],
   },
 ]
+
+/**
+ * Expanded backstories for the Who's Who screen (PRODUCT.md §4.6): 2-3
+ * kid-friendly sentences per boss, building on the one-line BOSS_BIOS above
+ * and the character notes in ART_PROMPTS.md. Reading age ~8, no first person.
+ */
+export const BOSS_STORIES: Record<number, string> = {
+  2: 'Nix is Head Prefect of Mischief, which mostly means confiscating dungbombs — and then keeping every single one for herself. She hides comics inside a hollowed-out copy of “Advanced Hexes” and never gets caught reading them. Her cat Inkblot once walked straight through a wet inkwell and across a whole term of homework, and Nix framed the pawprints instead of cleaning them off.',
+  3: 'Fern was raised out in the herb garden by a patch of talking brambles, so she speaks fluent Plant long before she ever learned fluent People. She can tell a toadstool’s mood from ten paces and grows her own snacks straight out of her sleeves. A ladybird named Dot rides everywhere on her shoulder and votes on all her important decisions.',
+  4: 'Willow delivers the night post and hasn’t slept properly since last Tuesday, though she’d never admit it slows her down. She can nap standing up, mid-sentence, with her eyes half open, and somehow still sorts every letter correctly. Her owl Hoots does most of the actual flying while Willow dozes on the broom behind him.',
+  5: 'Juniper is a potion prodigy whose fringe has been singed clean off more times than the academy can count. She keeps three bottled potions on a bandolier at all times, just in case of emergency snacks or emergency explosions. Nobody has ever seen her lab tidy, and nobody has ever seen one of her potions fail twice.',
+  6: 'Luna sleeps through breakfast, lunch and most of dinner, saving all her energy for naming constellations after midnight. She keeps a rolled-up star chart tucked under one arm at all times, even in the bath. Two tiny moons orbit her hat for reasons the academy has stopped trying to explain.',
+  7: 'Opal is Head Girl, three medals deep, and has never once lost her gold hand-mirror — not even the time the staircases rearranged themselves overnight. She keeps her trophies polished and her opinions sharper still. Her fluffy cat Marmalade wears a tiny purple bow and judges everyone’s homework from the windowsill.',
+  8: 'Bramble has won the Midnight Cup three years running and crashed spectacularly every single time, landing in the hedge with a grin instead of a wince. She wears a plaster on one knee as a badge of honour, not an injury. Her bat Turbo grips the broom tail through every loop-the-loop and screeches with delight the whole way down.',
+  9: 'Tilda winds every clock in the academy at dawn, and has never once been late in her life — not even by a second. She carries a spare gear in her pocket at all times, just in case one of the tower clocks gets any ideas. A tiny mechanical mouse named Cog rides on her hat, ticking along in perfect time with her.',
+  10: 'Marigold keeps the dragon-hoard ledgers and can count coins in her sleep, which is useful, because she often does exactly that. She pays for everything in exact change and has never once been short a knut. Three gold coins follow her everywhere, glowing softly, like they simply refuse to leave her side.',
+  11: 'Aria enchanted her old hairbrush into a microphone and now practises encores well past midnight, whether anyone is listening or not. She dreams in three-part harmony and hums the academy anthem as a warm-up before breakfast. Her cat Tempo wears a tiny bow and provides backing vocals, whether he means to or not.',
+  12: 'Storm runs the secret Midnight Racing Club and bottles actual lightning for fun, storing the bolts in corked jars along her belt. One streak of her hair turned electric-blue after a race gone wonderfully wrong, and she has worn it proudly ever since. Her bat Zigzag flies beside her trailing sparks, tracing the same jagged path lightning takes across the sky.',
+}
 
 export function locationForTable(table: number): MapLocation {
   return MAP_LOCATIONS.find((loc) => loc.table === table) ?? MAP_LOCATIONS[0]

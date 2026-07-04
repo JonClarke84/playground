@@ -9,6 +9,7 @@ import { AvatarCreator } from './screens/AvatarCreator'
 import { DuelScreen } from './screens/DuelScreen'
 import { MapScreen } from './screens/MapScreen'
 import { SpellbookScreen } from './screens/SpellbookScreen'
+import { CharactersScreen } from './screens/CharactersScreen'
 import './spellDuel.css'
 
 /**
@@ -22,6 +23,7 @@ export function spellDuelRoutes(): ReactElement {
       <Route path="dressing-room" element={<CreatorRoute />} />
       <Route path="map" element={<MapRoute />} />
       <Route path="spellbook" element={<SpellbookRoute />} />
+      <Route path="characters" element={<CharactersRoute />} />
       <Route path="duel" element={<DuelRoute exam={false} />} />
       <Route path="duel/:table" element={<DuelRoute exam={false} />} />
       <Route path="duel/:table/exam" element={<DuelRoute exam />} />
@@ -66,6 +68,7 @@ function TitleRoute() {
       onDressingRoom={() => navigate('dressing-room')}
       onMap={() => navigate('map')}
       onSpellbook={() => navigate('spellbook')}
+      onCharacters={() => navigate('characters')}
     />
   )
 }
@@ -92,6 +95,11 @@ function MapRoute() {
 function SpellbookRoute() {
   const navigate = useNavigate()
   return <SpellbookScreen onExit={() => navigate('/spell-duel')} />
+}
+
+function CharactersRoute() {
+  const navigate = useNavigate()
+  return <CharactersScreen onExit={() => navigate('/spell-duel')} />
 }
 
 function DuelRoute({ exam }: { exam: boolean }) {

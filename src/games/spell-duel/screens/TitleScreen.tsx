@@ -4,6 +4,7 @@ import { sfx } from '../../../lib/audio'
 import { useSpellDuelStore } from '../state/store'
 import { WitchAvatar } from '../avatar/WitchAvatar'
 import { DEFAULT_AVATAR } from '../avatar/avatarTypes'
+import './menus.css'
 
 const ALL_TABLES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
@@ -13,9 +14,17 @@ interface TitleScreenProps {
   onDressingRoom: () => void
   onMap: () => void
   onSpellbook: () => void
+  onCharacters: () => void
 }
 
-export function TitleScreen({ onExit, onPlay, onDressingRoom, onMap, onSpellbook }: TitleScreenProps) {
+export function TitleScreen({
+  onExit,
+  onPlay,
+  onDressingRoom,
+  onMap,
+  onSpellbook,
+  onCharacters,
+}: TitleScreenProps) {
   const avatar = useSpellDuelStore((s) => s.avatar) ?? DEFAULT_AVATAR
   const tables = useSpellDuelStore((s) => s.tables)
   const toggleTable = useSpellDuelStore((s) => s.toggleTable)
@@ -41,17 +50,27 @@ export function TitleScreen({ onExit, onPlay, onDressingRoom, onMap, onSpellbook
 
       <div className="sd-title-layout">
         <div className="sd-title-left">
-          <button className="sd-title-avatar" onClick={onDressingRoom} aria-label="Open the dressing room">
+          <button
+            className="sd-title-avatar sd-title-avatar-float"
+            onClick={onDressingRoom}
+            aria-label="Open the dressing room"
+          >
             <WitchAvatar config={avatar} />
             <span className="sd-title-avatar-edit">Dressing room ✨</span>
           </button>
+          <span className="sd-title-avatar-ground" aria-hidden="true" />
           {sparkleDust > 0 && (
             <span className="sd-title-dust">✦ {sparkleDust} sparkle dust</span>
           )}
         </div>
 
         <div className="sd-title-right">
-          <h2 className="sd-title-heading">Spell Duel</h2>
+          <span className="sd-title-heading-wrap">
+            <h2 className="sd-title-heading">Spell Duel</h2>
+            <span className="sd-title-sparkle sd-title-sparkle--1" aria-hidden="true" />
+            <span className="sd-title-sparkle sd-title-sparkle--2" aria-hidden="true" />
+            <span className="sd-title-sparkle sd-title-sparkle--3" aria-hidden="true" />
+          </span>
           <p className="sd-title-sub">Which spells shall we practise?</p>
 
           <div className="table-chips">
@@ -83,6 +102,9 @@ export function TitleScreen({ onExit, onPlay, onDressingRoom, onMap, onSpellbook
             </button>
             <button className="button-secondary" onClick={onSpellbook}>
               📖 Spellbook
+            </button>
+            <button className="button-secondary" onClick={onCharacters}>
+              📜 Who's Who
             </button>
           </div>
         </div>
