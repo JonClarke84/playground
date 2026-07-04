@@ -3,9 +3,10 @@ import { HomeButton } from '../../../shell/HomeButton'
 import { StarField } from '../../../shell/StarField'
 import { sfx } from '../../../lib/audio'
 import { useSpellDuelStore } from '../state/store'
-import { MAP_LOCATIONS, type MapLocation } from '../progression'
+import { BOSS_BIOS, MAP_LOCATIONS, type MapLocation } from '../progression'
 import { EXAM_REWARDS, itemById } from '../avatar/unlocks'
-import { RivalWitch } from '../art/RivalWitch'
+import { BossPortrait } from '../art/bosses'
+import './menus.css'
 
 /**
  * The academy-year map (PRODUCT.md §4.6): a winding path of locations, one
@@ -44,6 +45,8 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
   return (
     <div className="map">
       <StarField seed={31} count={50} />
+      <span className="map-mist map-mist--1" aria-hidden="true" />
+      <span className="map-mist map-mist--2" aria-hidden="true" />
       <HomeButton onExit={onExit} />
       <h2 className="map-title">The Academy Year</h2>
 
@@ -70,6 +73,7 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
             style={{
               left: `${pos.x}%`,
               top: `${pos.y}%`,
+              animationDelay: `${i * 0.15}s`,
               ...(passed ? {} : { borderColor: `${loc.theme.accent}66` }),
             }}
             onClick={() => {
@@ -89,11 +93,7 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
         <div className="map-sheet" onClick={() => setSelected(null)}>
           <div className="map-sheet-panel" onClick={(e) => e.stopPropagation()}>
             <div className="map-sheet-boss">
-              <RivalWitch
-                palette={selected.boss.palette}
-                emblem={selected.boss.emblem}
-                companion={selected.boss.companion}
-              />
+              <BossPortrait table={selected.table} />
             </div>
             <h3>{selected.name}</h3>
             <p className="map-sheet-sub">
@@ -105,6 +105,9 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
                   : ''
               })()}
             </p>
+            {BOSS_BIOS[selected.table] && (
+              <p className="map-sheet-bio">“{BOSS_BIOS[selected.table]}”</p>
+            )}
             <Stars count={bestStars[String(selected.table)] ?? 0} />
             <div className="map-sheet-actions">
               <button className="button-secondary" onClick={() => onPlay(selected.table, false)}>

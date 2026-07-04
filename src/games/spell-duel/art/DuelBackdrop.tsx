@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { SceneTheme, SceneVariant } from '../progression'
 import { DEFAULT_THEME } from '../progression'
+import { sceneImageUrl } from '../../../lib/art'
 
 /**
  * Themed full-bleed duel scenes — one per academy location (PRODUCT.md §4.6),
@@ -448,6 +449,12 @@ const PROPS: Record<SceneVariant, (glass: string) => ReactElement> = {
 }
 
 export function DuelBackdrop({ theme = DEFAULT_THEME }: { theme?: SceneTheme }) {
+  // Painted backdrop wins when one has been dropped in (see ART_PROMPTS.md);
+  // the animated ambient layers still render above it.
+  const raster = sceneImageUrl(theme.variant)
+  if (raster !== null) {
+    return <img className="duel-backdrop duel-backdrop--raster" src={raster} alt="" draggable={false} />
+  }
   const skyId = `sky-${theme.variant}`
   const floorId = `floor-${theme.variant}`
   return (

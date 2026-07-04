@@ -11,6 +11,7 @@ import { EXAM_REWARDS, itemById } from '../avatar/unlocks'
 import { DuelBackdrop } from '../art/DuelBackdrop'
 import { Pip, type PipMood } from '../art/Pip'
 import { RivalWitch, type RivalMood } from '../art/RivalWitch'
+import { BossPortrait } from '../art/bosses'
 import { WitchAvatar } from '../avatar/WitchAvatar'
 import { DEFAULT_AVATAR, type Expression } from '../avatar/avatarTypes'
 import { SpellCrystal } from '../components/SpellCrystal'
@@ -34,6 +35,13 @@ const PIP_HINT_LINES = [
 
 const PIP_WAND_INTRO = 'See that glowing wand? Tap it to crack a big spell into little ones — real witch maths!'
 const PIP_WAND_NUDGE = 'Tricky one! Try the Hint Wand ✨'
+
+/** Hype lines Pip shouts at brilliant-cast streak milestones. */
+const PIP_STREAK_LINES: Record<number, string> = {
+  3: 'On fire!',
+  5: 'Unstoppable!',
+  8: 'LEGENDARY!',
+}
 
 const FINALE_COPY: Record<FinaleTier, { title: string; line: string }> = {
   good: { title: 'Lovely casting!', line: 'The enchantments are undone!' },
@@ -118,6 +126,8 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   const [wandNudge, setWandNudge] = useState(false)
   const [beam, setBeam] = useState<BeamState | null>(null)
   const [impactKey, setImpactKey] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [comboPulse, setComboPulse] = useState(0)
   const { canvasRef, handle } = useParticleCanvas()
   const stageRef = useRef<HTMLDivElement | null>(null)
   const heroRef = useRef<HTMLDivElement | null>(null)
@@ -216,16 +226,22 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
 
     if (next.lastEvent?.type === 'cast') {
       const brilliant = next.lastEvent.quality === 'brilliant'
+      const nextStreak = brilliant ? streak + 1 : 0
+      setStreak(nextStreak)
+      const comboMultiplier = nextStreak >= 3 ? 1.5 : 1
+      if (nextStreak >= 2) setComboPulse((k) => k + 1)
+      const hype = PIP_STREAK_LINES[nextStreak]
       sfx.cast()
       setPipMood('cheer')
-      setPipLine(null)
+      setPipLine(hype ?? null)
+      if (hype) later(2200, () => setPipLine(null))
       setPhase('casting')
       setHeroMood('grin')
       setHeroCasting(true)
       later(650, () => setHeroCasting(false))
 
       // 1. Crystal flares…
-      burstAt(0.5, 0.4, { count: brilliant ? 46 : 26 })
+      burstAt(0.5, 0.4, { count: Math.round((brilliant ? 46 : 26) * comboMultiplier) })
       // 2. …the beam fires from her wand…
       const impact = fireBeam(!brilliant)
       // 3. …and lands on Nix: burst, shock, shake, flash.
@@ -234,11 +250,11 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
         setImpactKey((k) => k + 1)
         if (impact) {
           burstAtPx(impact.x, impact.y, {
-            count: brilliant ? 56 : 32,
+            count: Math.round((brilliant ? 56 : 32) * comboMultiplier),
             speed: 7,
             colours: ['#2fd48a', '#7dedbb', '#ffd166', '#ff7ac3', '#fff8f0'],
           })
-          burstAtPx(impact.x, impact.y, { count: 16, speed: 3, gravity: 0.12 })
+          burstAtPx(impact.x, impact.y, { count: Math.round(16 * comboMultiplier), speed: 3, gravity: 0.12 })
         }
       })
 
@@ -260,6 +276,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
       })
     } else if (next.lastEvent?.type === 'fizzle') {
       sfx.fizzle()
+      setStreak(0)
       setPipMood('oops')
       setHeroMood('wow')
       // Two misses on the same spell and the wand hasn't been tried: nudge.
@@ -292,6 +309,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
     if (next === duel) return
     sfx.hint()
     setDuel(next)
+    setStreak(0)
     setHeroMood('thinking')
     setWandNudge(false)
     if (next.current?.hintStage === 1) {
@@ -328,6 +346,14 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   const finale = FINALE_COPY[finaleTierValue]
   const dustEarned =
     duel.meterHalves + duel.history.filter((r) => r.quality === 'brilliant').length
+  const practiseFacts = useMemo(
+    () =>
+      duel.history
+        .filter((r) => r.usedHint || r.quality === 'scrappy')
+        .slice(0, 3)
+        .map((r) => `${r.fact.a}×${r.fact.b}`),
+    [duel.history],
+  )
 
   return (
     <div className={`duel${impactKey > 0 && phase === 'casting' ? ' duel--shake' : ''}`} ref={stageRef}>
@@ -336,7 +362,14 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
       <HomeButton onExit={onExit} />
 
       <div className="duel-top">
-        <MagicMeter halves={duel.meterHalves} rounds={duel.config.rounds} />
+        <div className="duel-top-meter-row">
+          <MagicMeter halves={duel.meterHalves} rounds={duel.config.rounds} />
+          {streak >= 2 && (
+            <span key={comboPulse} className="combo-badge">
+              ✨ x{streak}!
+            </span>
+          )}
+        </div>
         <span className="duel-round-label">
           {isExam && location ? `${location.name} exam — ` : location ? `${location.name} — ` : ''}
           Round {roundNumber} of {duel.config.rounds}
@@ -347,14 +380,15 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
         {phase === 'question' && <div className="speech speech--rival">{blurb}</div>}
         <div
           ref={rivalRef}
-          className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}`}
+          className={`duel-rival-art${rivalMood === 'shocked' ? ' duel-rival-art--hit' : ''}${
+            phase === 'finale' ? ' duel-rival-art--defeated' : ''
+          }`}
         >
-          <RivalWitch
-            mood={rivalMood}
-            palette={location?.boss.palette}
-            emblem={location?.boss.emblem}
-            companion={location?.boss.companion}
-          />
+          {location ? (
+            <BossPortrait table={location.table} mood={rivalMood} />
+          ) : (
+            <RivalWitch mood={rivalMood} />
+          )}
         </div>
         {location && <span className="duel-rival-name">{location.boss.name}</span>}
       </div>
@@ -433,6 +467,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
 
       {phase === 'finale' && (
         <div className="finale">
+          <div className="finale-rays" aria-hidden="true" />
           <div className="finale-avatar">
             <WitchAvatar config={avatar} expression="grin" />
           </div>
@@ -441,6 +476,9 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
           <p className="finale-dust">
             <span className="finale-dust-icon">✦</span> +{dustEarned + (isExam ? 10 : 0)} sparkle dust
           </p>
+          {practiseFacts.length > 0 && (
+            <p className="finale-practise">Spells to practise: {practiseFacts.join(' · ')}</p>
+          )}
           {isExam && examReward && rewardIsNew && (
             <p className="finale-reward">
               🎁 New costume piece: <strong>{examReward.label}</strong>

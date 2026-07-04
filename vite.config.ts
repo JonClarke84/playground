@@ -11,7 +11,10 @@ export default defineConfig({
       includeAssets: ['icon.svg'],
       // The Strudel music engine is a large lazy chunk; raise the precache
       // ceiling so it still works offline.
-      workbox: { maximumFileSizeToCacheInBytes: 6 * 1024 * 1024 },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico}'],
+      },
       manifest: {
         name: 'Playground',
         short_name: 'Playground',

@@ -1,6 +1,6 @@
 import { MAP_LOCATIONS } from '../games/spell-duel/progression'
 import { DuelBackdrop } from '../games/spell-duel/art/DuelBackdrop'
-import { RivalWitch } from '../games/spell-duel/art/RivalWitch'
+import { BossPortrait } from '../games/spell-duel/art/bosses'
 import '../games/spell-duel/spellDuel.css'
 
 /** Dev-only scene review at /?dev=scenes — every location with its boss. */
@@ -12,7 +12,7 @@ export function SceneGallery() {
           <div style={{ position: 'relative', aspectRatio: '16 / 10', borderRadius: 12, overflow: 'hidden' }}>
             <DuelBackdrop theme={loc.theme} />
             <div style={{ position: 'absolute', top: '4%', right: '2%', width: '26%' }}>
-              <RivalWitch palette={loc.boss.palette} emblem={loc.boss.emblem} companion={loc.boss.companion} />
+              <BossPortrait table={loc.table} />
             </div>
           </div>
           <figcaption style={{ fontWeight: 800, fontSize: 14, padding: '6px 2px' }}>
