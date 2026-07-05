@@ -1489,3 +1489,155 @@
     opacity: 1;
   }
 }
+
+/* ============ Portrait finalise ============ */
+
+/* Small framed thumbnail of the finished portrait, docked on the live preview. */
+.creator-portrait-thumb {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: clamp(64px, 8vw, 92px);
+  border-radius: var(--radius-md);
+  border: 3px solid var(--gold-500);
+  box-shadow: var(--glow-soft) var(--gold-glow);
+  background: rgba(20, 11, 46, 0.75);
+}
+
+.creator-avatar {
+  position: relative;
+}
+
+.creator-portrait-thumb--reveal {
+  animation: portrait-sparkle-burst 0.9s var(--ease-pop);
+}
+
+@keyframes portrait-sparkle-burst {
+  0% {
+    transform: scale(0.4) rotate(-8deg);
+    opacity: 0;
+    box-shadow: 0 0 0 var(--gold-glow);
+  }
+  45% {
+    transform: scale(1.22) rotate(4deg);
+    opacity: 1;
+    box-shadow: 0 0 46px var(--gold-glow), 0 0 90px var(--gold-glow);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+    box-shadow: var(--glow-soft) var(--gold-glow);
+  }
+}
+
+.creator-portrait-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.creator-finalise {
+  align-self: flex-end;
+  min-height: var(--tap-primary);
+  font-size: 22px;
+  padding: 14px 32px;
+}
+
+.creator-finalise--busy {
+  animation: portrait-paint-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes portrait-paint-pulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 0 #0a6b45, var(--glow-soft) var(--emerald-glow);
+  }
+  50% {
+    box-shadow: 0 6px 0 #0a6b45, 0 0 34px var(--gold-glow);
+  }
+}
+
+.creator-portrait-message {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gold-400);
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creator-portrait-thumb--reveal,
+  .creator-finalise--busy {
+    animation: none;
+  }
+}
+
+.duel-hero-raster {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.sd-title-portrait {
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+/* ============ Painted academy map ============ */
+
+.map-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.map-stage--painted {
+  /* Aspect-locked to the painting so plaques stay glued to their rooms. */
+  inset: auto;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  aspect-ratio: 3 / 2;
+  max-width: 100%;
+}
+
+.map-raster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: 0;
+}
+
+.map-node--plaque {
+  width: 118px;
+  min-height: 64px;
+  padding: 6px 6px 8px;
+  gap: 0;
+  background: rgba(20, 11, 46, 0.82);
+  border-width: 2.5px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.map-node--plaque .map-node-table {
+  font-size: 22px;
+}
+
+.map-node--plaque .map-node-name {
+  font-size: 11.5px;
+}
+
+.map-node-cta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--gold-400);
+  letter-spacing: 0.02em;
+}
+
+.map-title {
+  z-index: 25;
+}
