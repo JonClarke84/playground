@@ -18,7 +18,7 @@ const sceneFiles = import.meta.glob<string>('../assets/art/scenes/*.{webp,png}',
 function lookup(files: Record<string, string>, stem: string): string | null {
   for (const [path, url] of Object.entries(files)) {
     const base = path.split('/').pop() ?? ''
-    if (base === `${stem}.webp` || base === `${stem}.png`) return url
+    if (base === `${stem}.webp` || base === `${stem}.png` || base === `${stem}.jpg`) return url
   }
   return null
 }
@@ -31,4 +31,14 @@ export function bossImageUrl(name: string): string | null {
 /** Painted backdrop for a scene variant, or null to use the SVG. */
 export function sceneImageUrl(variant: string): string | null {
   return lookup(sceneFiles, variant)
+}
+
+const uiFiles = import.meta.glob<string>('../assets/art/ui/*.{webp,png,jpg}', {
+  eager: true,
+  import: 'default',
+})
+
+/** Painted UI art ('map', 'home'), or null to use the built-in styling. */
+export function uiImageUrl(name: string): string | null {
+  return lookup(uiFiles, name)
 }

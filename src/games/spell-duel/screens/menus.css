@@ -3,11 +3,13 @@
    these rules layer on top (specificity, not import order, is what wins). */
 
 .sd-title-layout {
-  gap: clamp(20px, 5vw, 80px);
+  gap: clamp(20px, 5vw, 64px);
 }
 
 .sd-title-right {
-  gap: 14px;
+  gap: clamp(8px, 1.6vh, 16px);
+  width: clamp(360px, 34vw, 540px);
+  max-width: 540px;
 }
 
 /* --- Heading: layered gradient text, glow, slow shimmer --- */
@@ -100,6 +102,219 @@
     opacity: 0;
     transform: translate(-4px, -18px) scale(0.6);
   }
+}
+
+/* --- Hero card: "The Academy Year" — the main event --- */
+
+.sd-title-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(200px, 30vh, 280px);
+  padding: clamp(16px, 2.4vh, 24px) clamp(18px, 2.4vw, 28px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-align: left;
+  background:
+    radial-gradient(120% 90% at 85% 0%, rgba(255, 209, 102, 0.28), transparent 55%),
+    linear-gradient(155deg, var(--emerald-600) 0%, var(--midnight-700) 55%, var(--midnight-800) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  box-shadow: var(--glow-soft) var(--emerald-glow), 0 10px 0 rgba(0, 0, 0, 0.3);
+  transition: transform var(--duration-base) var(--ease-pop), box-shadow var(--duration-base) var(--ease-smooth);
+}
+
+.sd-title-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.16) 45%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.16) 55%,
+    transparent 70%
+  );
+  background-size: 260% 260%;
+  background-position: 100% 0%;
+  animation: hero-shimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hero-shimmer {
+  0%,
+  100% {
+    background-position: 120% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+}
+
+.sd-title-hero:active {
+  transform: scale(0.98);
+}
+
+.sd-title-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sd-title-hero-path {
+  stroke: var(--gold-400);
+  stroke-opacity: 0.55;
+  stroke-width: 3.5;
+  stroke-dasharray: 11 10;
+  stroke-linecap: round;
+}
+
+.sd-title-hero-node {
+  fill: var(--midnight-900);
+  stroke: var(--gold-400);
+  stroke-width: 3;
+}
+
+.sd-title-hero-trophy {
+  fill: var(--gold-400);
+  stroke: var(--gold-600);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 10px var(--gold-glow));
+  transform-origin: 372px 60px;
+  animation: hero-trophy-bob 3.6s ease-in-out infinite;
+}
+
+@keyframes hero-trophy-bob {
+  0%,
+  100% {
+    transform: translate(372px, 60px) rotate(0deg);
+  }
+  50% {
+    transform: translate(372px, 60px) translateY(-6px) rotate(-4deg);
+  }
+}
+
+.sd-title-hero-star {
+  fill: var(--gold-400);
+  opacity: 0.85;
+  filter: drop-shadow(0 0 6px var(--gold-glow));
+  animation: hero-star-twinkle 3s ease-in-out infinite;
+}
+
+.sd-title-hero-star--1 {
+  animation-delay: 0s;
+}
+
+.sd-title-hero-star--2 {
+  animation-delay: 1s;
+}
+
+.sd-title-hero-star--3 {
+  animation-delay: 2s;
+}
+
+@keyframes hero-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.sd-title-hero-copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 78%;
+}
+
+.sd-title-hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 700;
+  color: var(--text-bright);
+  text-shadow: 0 0 20px var(--emerald-glow);
+}
+
+.sd-title-hero-tagline {
+  font-size: clamp(14px, 1.4vw, 17px);
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.sd-title-hero-cta {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-primary);
+  padding: 0 30px;
+  border-radius: var(--radius-round);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 600;
+  color: #063a24;
+  background: linear-gradient(180deg, var(--gold-400), var(--gold-600));
+  box-shadow: 0 6px 0 #b8830f, var(--glow-soft) var(--gold-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-title-hero::before,
+  .sd-title-hero-trophy,
+  .sd-title-hero-star {
+    animation: none;
+  }
+}
+
+/* --- Practise card: calmer, secondary --- */
+
+.sd-title-practise {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: clamp(14px, 2vh, 20px) clamp(16px, 2vw, 22px);
+  border-radius: var(--radius-md);
+  background: rgba(30, 18, 64, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.sd-title-practise .sd-title-sub {
+  font-size: 17px;
+}
+
+.sd-title-practise .table-chips {
+  gap: 8px;
+}
+
+.sd-title-practise .table-chip {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0 14px;
+  font-size: 19px;
+}
+
+.sd-title-practise .sd-title-play {
+  font-size: 26px;
+  padding: 12px 48px;
+}
+
+/* --- Link row: small pills for Spellbook / Who's Who --- */
+
+.sd-title-links {
+  gap: 10px;
+}
+
+.sd-title-link {
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 16px;
 }
 
 /* --- Avatar: gentle float + ground shadow --- */
@@ -246,4 +461,20 @@
   .map .map-sheet-panel {
     animation: none;
   }
+}
+
+/* Painted academy backdrop for the splash (falls back to StarField). */
+.sd-title-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sd-title-backdrop-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(20, 11, 46, 0.15) 0%, rgba(20, 11, 46, 0.45) 55%, rgba(14, 7, 34, 0.6) 100%);
+  pointer-events: none;
 }
