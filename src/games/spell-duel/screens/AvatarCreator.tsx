@@ -17,6 +17,7 @@ import {
 } from '../avatar/avatarTypes'
 import type { CostumeItem } from '../avatar/unlocks'
 import { isOptionUnlocked, lockedItemFor } from '../avatar/unlocks'
+import { generatePortrait, getGeminiKey, loadPortrait, savePortrait } from '../../../lib/portrait'
 
 type CategoryId =
   | 'skin'
@@ -54,6 +55,7 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
   const unlockedItems = useSpellDuelStore((s) => s.unlockedItems)
   const sparkleDust = useSpellDuelStore((s) => s.sparkleDust)
   const buyItem = useSpellDuelStore((s) => s.buyItem)
+  const spendDust = useSpellDuelStore((s) => s.spendDust)
   const avatar = stored ?? DEFAULT_AVATAR
   const [category, setCategory] = useState<CategoryId>('skin')
   const [deniedId, setDeniedId] = useState<string | null>(null)
@@ -78,6 +80,43 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
       setDeniedId(lock.id)
       window.setTimeout(() => setDeniedId(null), 550)
     }
+  }
+
+  const [hasGeminiKey] = useState(() => getGeminiKey() !== null)
+  const [portrait, setPortrait] = useState<string | null>(() => loadPortrait())
+  const [portraitBusy, setPortraitBusy] = useState(false)
+  const [portraitError, setPortraitError] = useState<string | null>(null)
+  const [portraitDenied, setPortraitDenied] = useState(false)
+  const [justPainted, setJustPainted] = useState(false)
+
+  const PORTRAIT_PRICE = 100
+
+  const finalisePortrait = () => {
+    if (portraitBusy) return
+    if (sparkleDust < PORTRAIT_PRICE) {
+      sfx.fizzle()
+      setPortraitDenied(true)
+      window.setTimeout(() => setPortraitDenied(false), 550)
+      return
+    }
+    setPortraitError(null)
+    setPortraitBusy(true)
+    generatePortrait(avatar)
+      .then((dataUrl) => {
+        savePortrait(dataUrl)
+        spendDust(PORTRAIT_PRICE)
+        setPortrait(dataUrl)
+        setJustPainted(true)
+        window.setTimeout(() => setJustPainted(false), 900)
+        sfx.cast()
+      })
+      .catch(() => {
+        setPortraitError('The paintbrush fizzled — try again soon')
+        sfx.fizzle()
+      })
+      .finally(() => {
+        setPortraitBusy(false)
+      })
   }
 
   const surprise = () => {
@@ -195,6 +234,13 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
           {firstRun && <h2 className="creator-heading">Make your witch!</h2>}
           <div className="creator-avatar">
             <WitchAvatar config={avatar} expression="grin" />
+            {portrait !== null && (
+              <img
+                className={`creator-portrait-thumb${justPainted ? ' creator-portrait-thumb--reveal' : ''}`}
+                src={portrait}
+                alt="Her finished painted portrait"
+              />
+            )}
           </div>
           <button className="button-secondary" onClick={surprise}>
             Surprise me! 🎲
@@ -256,6 +302,24 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
           >
             {firstRun ? 'She’s ready!' : 'Done'}
           </button>
+
+          {hasGeminiKey && (
+            <div className="creator-portrait-section">
+              <button
+                className={`button-primary creator-finalise${portraitDenied ? ' creator-option--denied' : ''}${
+                  portraitBusy ? ' creator-finalise--busy' : ''
+                }`}
+                disabled={portraitBusy}
+                onClick={finalisePortrait}
+              >
+                {portraitBusy
+                  ? 'Painting your portrait…'
+                  : `${portrait !== null ? 'Repaint portrait' : 'Finalise portrait'} ✦${PORTRAIT_PRICE}`}
+              </button>
+              {portraitDenied && <p className="creator-portrait-message">Earn more sparkle dust!</p>}
+              {portraitError !== null && <p className="creator-portrait-message">{portraitError}</p>}
+            </div>
+          )}
         </div>
       </div>
     </div>

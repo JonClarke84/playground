@@ -380,3 +380,16 @@
     opacity: 0;
   }
 }
+
+.parent-corner-key {
+  flex: 1;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--midnight-800);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-body);
+  padding: 10px;
+  font-size: 14px;
+}
+
+

@@ -12,6 +12,7 @@ import { DuelBackdrop } from '../art/DuelBackdrop'
 import { Pip, type PipMood } from '../art/Pip'
 import { RivalWitch, type RivalMood } from '../art/RivalWitch'
 import { BossPortrait } from '../art/bosses'
+import { loadPortrait } from '../../../lib/portrait'
 import { WitchAvatar } from '../avatar/WitchAvatar'
 import { DEFAULT_AVATAR, type Expression } from '../avatar/avatarTypes'
 import { SpellCrystal } from '../components/SpellCrystal'
@@ -127,6 +128,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   const [beam, setBeam] = useState<BeamState | null>(null)
   const [impactKey, setImpactKey] = useState(0)
   const [streak, setStreak] = useState(0)
+  const [heroPortrait] = useState<string | null>(() => loadPortrait())
   const [comboPulse, setComboPulse] = useState(0)
   const { canvasRef, handle } = useParticleCanvas()
   const stageRef = useRef<HTMLDivElement | null>(null)
@@ -394,7 +396,11 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
       </div>
 
       <div className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`} ref={heroRef}>
-        <WitchAvatar config={avatar} expression={heroMood} />
+        {heroPortrait !== null ? (
+          <img className="duel-hero-raster" src={heroPortrait} alt="Your witch" draggable={false} />
+        ) : (
+          <WitchAvatar config={avatar} expression={heroMood} />
+        )}
       </div>
 
       <div className="duel-centre">

@@ -75,6 +75,8 @@ interface SpellDuelStore extends SpellDuelPersisted {
   completeDuel: (duel: DuelState, examTable?: number) => void
   /** Spends sparkle dust on a locked costume piece. No-op if unaffordable. */
   buyItem: (item: CostumeItem) => void
+  /** Deducts dust if affordable; returns whether it was spent. */
+  spendDust: (amount: number) => boolean
   markWandIntroduced: () => void
   allowSubtraction: () => boolean
 }
@@ -144,6 +146,12 @@ export const useSpellDuelStore = create<SpellDuelStore>((set, get) => ({
         unlockedItems: [...state.unlockedItems, item.id],
       }
     }),
+
+  spendDust: (amount) => {
+    if (get().sparkleDust < amount) return false
+    set((state) => ({ sparkleDust: state.sparkleDust - amount }))
+    return true
+  },
 
   markWandIntroduced: () => set({ wandIntroduced: true }),
 

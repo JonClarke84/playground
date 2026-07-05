@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { exportAll, importAll } from '../lib/storage'
+import { clearGeminiKey, clearPortrait, getGeminiKey, setGeminiKey } from '../lib/portrait'
 import { useSpellDuelStore } from '../games/spell-duel/state/store'
 import { parseFactKey } from '../games/spell-duel/logic/facts'
 import { masteryScore } from '../games/spell-duel/logic/mastery'
@@ -23,6 +24,7 @@ export function ParentCorner({ onClose }: { onClose: () => void }) {
   const hintsSeen = useSpellDuelStore((s) => s.hintsSeen)
   const sparkleDust = useSpellDuelStore((s) => s.sparkleDust)
   const [importText, setImportText] = useState('')
+  const [keyDraft, setKeyDraft] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [confirmingReset, setConfirmingReset] = useState(false)
 
@@ -149,6 +151,51 @@ export function ParentCorner({ onClose }: { onClose: () => void }) {
           />
           <button className="parent-corner-button" onClick={handleImport} disabled={!importText.trim()}>
             Import
+          </button>
+        </div>
+
+        <h3>Portrait painting (Gemini API key)</h3>
+        <p className="parent-corner-stats">
+          Once a key is saved here, a “Finalise portrait” button appears in the dressing room.
+        </p>
+        <div className="parent-corner-import">
+          <input
+            type="password"
+            className="parent-corner-key"
+            value={keyDraft}
+            onChange={(e) => setKeyDraft(e.target.value)}
+            placeholder={getGeminiKey() !== null ? 'Key saved — enter a new one to replace' : 'Paste a Gemini API key…'}
+          />
+          <button
+            className="parent-corner-button"
+            disabled={keyDraft.trim() === ''}
+            onClick={() => {
+              setGeminiKey(keyDraft)
+              setKeyDraft('')
+              setMessage('Gemini key saved on this device.')
+            }}
+          >
+            Save key
+          </button>
+        </div>
+        <div className="parent-corner-actions">
+          <button
+            className="parent-corner-button parent-corner-button--danger"
+            onClick={() => {
+              clearGeminiKey()
+              setMessage('Gemini key removed.')
+            }}
+          >
+            Remove key
+          </button>
+          <button
+            className="parent-corner-button parent-corner-button--danger"
+            onClick={() => {
+              clearPortrait()
+              setMessage('Portrait deleted — the drawn avatar is back.')
+            }}
+          >
+            Delete portrait
           </button>
         </div>
 
