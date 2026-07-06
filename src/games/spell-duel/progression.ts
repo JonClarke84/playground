@@ -146,7 +146,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
     table: 2,
     name: 'The Library',
     boss: { name: 'Nix', palette: NIX_PALETTE, emblem: 'book', companion: 'cat' },
-    theme: theme('library', false, ['#1a0e36', '#241549', '#2e1c58'], ['#2a1a52', '#190e36'], '#4b3a86', '#c9a1e8'),
+    theme: {
+      ...theme('library', false, ['#1a0e36', '#241549', '#2e1c58'], ['#2a1a52', '#190e36'], '#4b3a86', '#c9a1e8'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The books are flying south for winter!',
       'Every story now ends with "…and then a frog"!',
@@ -165,7 +173,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'potion',
       companion: null,
     },
-    theme: theme('potions', false, ['#0c2418', '#12331f', '#173d26'], ['#143122', '#0a1d13'], '#2f6b4a', '#2fd48a'),
+    theme: {
+      ...theme('potions', false, ['#0c2418', '#12331f', '#173d26'], ['#143122', '#0a1d13'], '#2f6b4a', '#2fd48a'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The potions are swapping their labels!',
       'The cauldron is blowing raspberry bubbles!',
@@ -184,7 +200,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'coin',
       companion: null,
     },
-    theme: theme('treasury', false, ['#241503', '#332008', '#40290e'], ['#33230a', '#1e1304'], '#6b5220', '#ffd166'),
+    theme: {
+      ...theme('treasury', false, ['#241503', '#332008', '#40290e'], ['#33230a', '#1e1304'], '#6b5220', '#ffd166'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The coins are rolling away on holiday!',
       'The vault door is telling knock-knock jokes!',
@@ -230,7 +254,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'feather',
       companion: 'owl',
     },
-    theme: theme('owlery', false, ['#211224', '#301b31', '#3c243c'], ['#301b31', '#1c0f1e'], '#5a3b58', '#e8c69d'),
+    theme: {
+      ...theme('owlery', false, ['#211224', '#301b31', '#3c243c'], ['#301b31', '#1c0f1e'], '#5a3b58', '#e8c69d'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The owls are hooting the wrong o’clock!',
       'Someone swapped all the owls’ letters!',
@@ -249,7 +281,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'crescent',
       companion: null,
     },
-    theme: theme('stars', false, ['#060d26', '#0b1638', '#101d47'], ['#101d47', '#080f28'], '#27407c', '#8fb4ff'),
+    theme: {
+      ...theme('stars', false, ['#060d26', '#0b1638', '#101d47'], ['#101d47', '#080f28'], '#27407c', '#8fb4ff'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The telescope is looking at its own feet!',
       'Someone tied the stars together with string!',
@@ -268,7 +308,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'star',
       companion: 'cat',
     },
-    theme: DEFAULT_THEME,
+    theme: {
+      ...DEFAULT_THEME,
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: DEFAULT_BLURBS,
   },
   {
@@ -280,7 +328,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'star',
       companion: 'bat',
     },
-    theme: theme('brooms', true, ['#2b1230', '#47204a', '#5f2f4a'], ['#3a2030', '#22101c'], '#f0a35e', '#f0a35e'),
+    theme: {
+      ...theme('brooms', true, ['#2b1230', '#47204a', '#5f2f4a'], ['#3a2030', '#22101c'], '#f0a35e', '#f0a35e'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The brooms are sweeping the sky!',
       'Someone tied all the brooms in a bow!',
@@ -299,7 +355,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'gear',
       companion: null,
     },
-    theme: theme('clock', false, ['#0e1a24', '#152736', '#1c3244'], ['#152736', '#0b1620'], '#2f5468', '#5fc4d4'),
+    theme: {
+      ...theme('clock', false, ['#0e1a24', '#152736', '#1c3244'], ['#152736', '#0b1620'], '#2f5468', '#5fc4d4'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The clock is striking thirteen!',
       'The gears are running backwards!',
@@ -318,7 +382,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'note',
       companion: 'cat',
     },
-    theme: theme('music', false, ['#26102e', '#38173f', '#471e4c'], ['#38173f', '#200d26'], '#6b3a70', '#ff8fd0'),
+    theme: {
+      ...theme('music', false, ['#26102e', '#38173f', '#471e4c'], ['#38173f', '#200d26'], '#6b3a70', '#ff8fd0'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The piano is playing itself — badly!',
       'The harp will only play wobbly songs!',
@@ -337,7 +409,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'bolt',
       companion: 'bat',
     },
-    theme: theme('rooftops', true, ['#0a0f1e', '#111a30', '#1a2540'], ['#141b2c', '#0b101c'], '#8fb4ff', '#5fc4d4'),
+    theme: {
+      ...theme('rooftops', true, ['#0a0f1e', '#111a30', '#1a2540'], ['#141b2c', '#0b101c'], '#8fb4ff', '#5fc4d4'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The chimneys are blowing smoke rings!',
       'Someone is turning off the stars one by one!',
