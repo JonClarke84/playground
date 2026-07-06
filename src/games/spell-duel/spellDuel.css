@@ -1726,3 +1726,444 @@
     animation: none;
   }
 }
+
+/* ============ Mobile (phones) ============ */
+
+.map-scroll {
+  position: absolute;
+  inset: 0;
+}
+
+@media (max-width: 760px) {
+  /* ---- Dressing room ---- */
+  .creator {
+    overflow-y: auto;
+  }
+
+  .creator-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: 100%;
+    gap: 12px;
+    padding: 14px 12px 24px;
+  }
+
+  .creator-preview {
+    flex: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .creator-heading {
+    width: 100%;
+    text-align: center;
+    font-size: 26px;
+    order: -1;
+    margin-right: 56px;
+  }
+
+  .creator-avatar {
+    width: clamp(120px, 36vw, 170px);
+    padding: 6px;
+  }
+
+  .creator-panel {
+    padding: 12px 10px;
+  }
+
+  .creator-dust {
+    margin-right: 60px;
+    font-size: 15px;
+  }
+
+  .creator-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .creator-tab {
+    min-height: 48px;
+    padding: 0 16px;
+    font-size: 16px;
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .creator-options {
+    gap: 9px;
+  }
+
+  .creator-option {
+    width: calc((100% - 18px) / 3);
+    height: 116px;
+  }
+
+  .creator-mini {
+    width: 80px;
+  }
+
+  .creator-swatch {
+    width: 54px;
+    height: 54px;
+  }
+
+  .creator-price {
+    font-size: 12.5px;
+    padding: 2px 9px;
+    bottom: 5px;
+  }
+
+  .creator-done,
+  .creator-finalise {
+    align-self: stretch;
+    font-size: 22px;
+    padding: 12px 24px;
+  }
+
+  /* ---- Duel ---- */
+  .duel-top {
+    top: 8px;
+  }
+
+  .magic-meter-track {
+    width: clamp(140px, 42vw, 380px);
+  }
+
+  .duel-round-label {
+    font-size: 12px;
+    max-width: 86vw;
+    text-align: center;
+  }
+
+  .combo-badge {
+    font-size: 15px;
+  }
+
+  .duel-centre {
+    top: 13%;
+    bottom: 34%;
+  }
+
+  .crystal--whole .crystal-shape {
+    width: clamp(150px, 44vw, 300px);
+  }
+
+  .crystal-text {
+    font-size: clamp(32px, 11vw, 72px);
+  }
+
+  .crystal-split {
+    gap: 8px;
+  }
+
+  .crystal--part {
+    width: clamp(94px, 25vw, 200px);
+  }
+
+  .crystal-text--small {
+    font-size: clamp(18px, 5.5vw, 42px);
+  }
+
+  .crystal-reveal {
+    font-size: clamp(24px, 7vw, 56px);
+  }
+
+  .crystal-op {
+    font-size: clamp(24px, 7vw, 64px);
+  }
+
+  .answer-bubbles {
+    flex-wrap: wrap;
+    gap: 10px;
+    bottom: 12px;
+    padding-inline: 8px;
+  }
+
+  .answer-bubble {
+    width: clamp(78px, 21vw, 104px);
+    height: clamp(78px, 21vw, 104px);
+  }
+
+  .answer-bubble-value {
+    font-size: clamp(26px, 8vw, 40px);
+  }
+
+  .hint-wand {
+    top: auto;
+    bottom: 132px;
+    right: 10px;
+    width: 78px;
+    height: 78px;
+    font-size: 13px;
+  }
+
+  .hint-wand svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .duel-rival {
+    top: 64px;
+    right: 8px;
+  }
+
+  .duel-rival-art {
+    width: clamp(116px, 33vw, 180px);
+  }
+
+  .duel-rival-name {
+    font-size: 12.5px;
+  }
+
+  .speech {
+    font-size: 13.5px;
+    max-width: 175px;
+    padding: 8px 11px;
+  }
+
+  .duel-hero {
+    width: clamp(120px, 34vw, 200px);
+    bottom: 128px;
+    left: 8px;
+  }
+
+  .duel-pip {
+    left: 8px;
+    right: auto;
+    top: 74px;
+    bottom: auto;
+    align-items: flex-start;
+  }
+
+  .duel-pip-art {
+    width: 60px;
+  }
+
+  /* Staged JRPG duels: boost character scale (inline % styles are tuned
+     for wide screens) and lift her above the answer bubbles. */
+  .duel--staged .duel-hero {
+    width: clamp(128px, 38vw, 220px) !important;
+    bottom: 25% !important;
+    left: 6% !important;
+  }
+
+  .duel--staged .duel-rival {
+    width: clamp(112px, 33vw, 200px) !important;
+    bottom: 52% !important;
+    left: auto !important;
+    right: 6% !important;
+  }
+
+  .duel-shadow {
+    width: 30vw !important;
+  }
+
+  .duel-shadow--boss {
+    width: 22vw !important;
+    left: auto !important;
+    right: 9% !important;
+    bottom: 47% !important;
+  }
+
+  .duel--staged .duel-shadow:not(.duel-shadow--boss) {
+    left: 9% !important;
+    bottom: 23.5% !important;
+  }
+
+  .duel-fg {
+    opacity: 0.85;
+  }
+
+  .finale-title {
+    font-size: clamp(32px, 10vw, 56px);
+  }
+
+  .finale-avatar {
+    width: clamp(130px, 38vw, 200px);
+  }
+
+  .finale-actions {
+    flex-direction: column;
+    width: min(320px, 86vw);
+  }
+
+  .finale-reward {
+    font-size: 16px;
+    text-align: center;
+    max-width: 88vw;
+  }
+
+  /* ---- Academy map: swipe to pan the painting ---- */
+  .map-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .map-stage--painted {
+    left: 0;
+    transform: none;
+  }
+
+  .map-title {
+    font-size: 22px;
+    top: 30px;
+    width: max-content;
+  }
+
+  .map-node--plaque {
+    width: 92px;
+    min-height: 56px;
+    padding: 4px 4px 6px;
+  }
+
+  .map-node--plaque .map-node-table {
+    font-size: 18px;
+  }
+
+  .map-node--plaque .map-node-name {
+    font-size: 10px;
+  }
+
+  .map-node-cta {
+    font-size: 9px;
+  }
+
+  .map-star {
+    width: 13px;
+    height: 13px;
+  }
+
+  .map-sheet-panel {
+    width: 94vw;
+    padding: 14px 16px 18px;
+    gap: 8px;
+  }
+
+  .map-sheet-boss {
+    width: 140px;
+    margin-top: -66px;
+  }
+
+  .map-sheet-panel h3 {
+    font-size: 23px;
+  }
+
+  .map-sheet-sub,
+  .map-sheet-bio {
+    font-size: 13.5px;
+  }
+
+  .map-sheet-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .map-sheet-actions .button-primary,
+  .map-sheet-actions .button-secondary {
+    width: 100%;
+    font-size: 22px;
+    padding: 12px 20px;
+  }
+
+  /* ---- Spellbook ---- */
+  .spellbook {
+    padding: 16px 12px 28px;
+  }
+
+  .spellbook-header {
+    padding: 52px 0 14px;
+  }
+
+  .spellbook-grid {
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 9px;
+  }
+
+  .spell-card-fact {
+    font-size: 16px;
+  }
+
+  .spell-card-answer {
+    font-size: 20px;
+  }
+
+  .spell-card-split {
+    font-size: 10px;
+  }
+
+  /* ---- Who's Who ---- */
+  .characters-title {
+    font-size: 26px;
+    padding-top: 46px;
+  }
+
+  .character-card,
+  .character-card--right {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+    padding: 16px 14px;
+  }
+
+  .character-card-portrait {
+    width: clamp(140px, 44vw, 190px);
+    margin: 0 auto;
+  }
+
+  .character-card-body {
+    text-align: center;
+  }
+}
+
+/* Short landscape phones: keep the boss's speech on-screen. */
+@media (max-height: 480px) {
+  .duel-rival {
+    top: 44px;
+  }
+
+  .speech {
+    font-size: 13px;
+    max-width: 190px;
+    padding: 7px 10px;
+  }
+
+  .duel-top {
+    top: 4px;
+  }
+
+  .duel--staged .duel-rival {
+    bottom: auto !important;
+    top: 40px;
+  }
+}
+
+/* Notched phones: keep corner chrome inside the safe area. */
+.sound-toggle {
+  top: max(20px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+}
+
+/* Portrait painting: the tall map fills the height, no distortion. */
+.map-stage--tall {
+  position: relative;
+  inset: auto;
+  aspect-ratio: 2 / 3;
+  width: min(100%, calc(100vh * 0.6667));
+  height: auto;
+  margin: 0 auto;
+}
+
+.map-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-scroll > .map-stage--painted {
+  flex: none;
+}

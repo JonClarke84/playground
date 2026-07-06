@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HomeButton } from '../../../shell/HomeButton'
 import { StarField } from '../../../shell/StarField'
 import { sfx } from '../../../lib/audio'
@@ -21,6 +21,35 @@ const NODE_POSITIONS: Array<{ x: number; y: number }> = [
   { x: 90, y: 56 }, { x: 67, y: 48 }, { x: 44, y: 54 }, { x: 21, y: 48 },
   { x: 14, y: 20 }, { x: 42, y: 14 }, { x: 70, y: 20 },
 ]
+
+// Plaque positions for the PORTRAIT painting (ui/map-portrait.webp),
+// matched by eye. Order = MAP_LOCATIONS order.
+const PORTRAIT_POSITIONS: Array<{ x: number; y: number }> = [
+  { x: 16, y: 82 },  // 2  library
+  { x: 49, y: 81 },  // 5  potions lab
+  { x: 83, y: 86 },  // 10 treasury
+  { x: 82, y: 62 },  // 3  herb garden
+  { x: 84, y: 44 },  // 4  owlery
+  { x: 16, y: 36 },  // 6  star tower
+  { x: 50, y: 48 },  // 7  grand hall
+  { x: 14, y: 60 },  // 8  broom yard
+  { x: 21, y: 17 },  // 9  clock tower
+  { x: 52, y: 29 },  // 11 music room
+  { x: 79, y: 12 },  // 12 rooftops
+]
+
+function useIsPortrait(): boolean {
+  const [portrait, setPortrait] = useState(
+    () => typeof matchMedia !== 'undefined' && matchMedia('(orientation: portrait)').matches,
+  )
+  useEffect(() => {
+    const query = matchMedia('(orientation: portrait)')
+    const onChange = (e: MediaQueryListEvent) => setPortrait(e.matches)
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
+  return portrait
+}
 
 // Plaque positions matched by eye to the buildings in the PAINTED map
 // (src/assets/art/ui/map.webp) — the stage is aspect-locked to the image,
@@ -62,8 +91,15 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
   const examsPassed = useSpellDuelStore((s) => s.examsPassed)
   const [selected, setSelected] = useState<MapLocation | null>(null)
 
-  const painted = uiImageUrl('map')
-  const positions = painted !== null ? PAINTED_POSITIONS : NODE_POSITIONS
+  const isPortrait = useIsPortrait()
+  const portraitMap = uiImageUrl('map-portrait')
+  const useTall = isPortrait && portraitMap !== null
+  const painted = useTall ? portraitMap : uiImageUrl('map')
+  const positions = useTall
+    ? PORTRAIT_POSITIONS
+    : painted !== null
+      ? PAINTED_POSITIONS
+      : NODE_POSITIONS
 
   return (
     <div className="map">
@@ -77,7 +113,10 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
       <HomeButton onExit={onExit} />
       <h2 className="map-title">The Academy Year</h2>
 
-      <div className={`map-stage${painted !== null ? ' map-stage--painted' : ''}`}>
+      <div className="map-scroll">
+      <div
+        className={`map-stage${painted !== null ? (useTall ? ' map-stage--tall' : ' map-stage--painted') : ''}`}
+      >
         {painted !== null && (
           <img className="map-raster" src={painted} alt="" draggable={false} />
         )}
@@ -123,6 +162,7 @@ export function MapScreen({ onExit, onPlay }: MapScreenProps) {
             </button>
           )
         })}
+      </div>
       </div>
 
       {selected && (

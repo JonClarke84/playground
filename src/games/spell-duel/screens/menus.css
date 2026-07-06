@@ -478,3 +478,55 @@
   background: linear-gradient(105deg, rgba(20, 11, 46, 0.15) 0%, rgba(20, 11, 46, 0.45) 55%, rgba(14, 7, 34, 0.6) 100%);
   pointer-events: none;
 }
+
+/* ============ Mobile (phones) ============ */
+@media (max-width: 760px) {
+  .sd-title.sd-title {
+    overflow-y: auto;
+  }
+
+  .sd-title .sd-title-layout {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: auto;
+    min-height: 100%;
+    gap: 18px;
+    padding: 68px 16px 32px;
+  }
+
+  .sd-title .sd-title-left {
+    width: 100%;
+  }
+
+  .sd-title .sd-title-avatar {
+    width: clamp(150px, 44vw, 210px);
+  }
+
+  .sd-title .sd-title-right {
+    width: 100%;
+    max-width: none;
+    gap: 14px;
+  }
+
+  .sd-title .sd-title-heading {
+    font-size: clamp(38px, 11vw, 54px);
+    text-align: center;
+  }
+
+  .sd-title .sd-title-hero,
+  .sd-title .sd-title-practise {
+    width: 100%;
+  }
+
+  .sd-title .sd-title-play {
+    align-self: stretch;
+    font-size: 26px;
+    padding: 14px 32px;
+  }
+
+  .sd-title .sd-title-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

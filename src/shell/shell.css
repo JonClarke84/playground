@@ -195,8 +195,8 @@
 
 .home-button {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: max(20px, env(safe-area-inset-top));
+  left: max(20px, env(safe-area-inset-left));
   z-index: 40;
   width: var(--tap-min);
   height: var(--tap-min);
@@ -393,3 +393,51 @@
 }
 
 
+
+/* ============ Mobile (phones) ============ */
+@media (max-width: 760px) {
+  .home {
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  .home-title {
+    font-size: clamp(34px, 10vw, 48px);
+    padding-top: 18px;
+  }
+
+  .home-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 8px 16px 72px;
+  }
+
+  .game-card {
+    width: min(88vw, 340px);
+  }
+
+  .parent-corner-panel {
+    padding: 18px 16px;
+    max-height: 92vh;
+  }
+
+  .parent-corner-table th,
+  .parent-corner-table td {
+    padding: 5px 6px;
+    font-size: 12.5px;
+  }
+
+  .mastery-bar {
+    width: 64px;
+  }
+
+  .parent-corner-import {
+    flex-wrap: wrap;
+  }
+
+  .parent-corner-key {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+}

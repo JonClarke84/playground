@@ -20,7 +20,7 @@ export default defineConfig({
         short_name: 'Playground',
         description: 'A playground of games',
         display: 'fullscreen',
-        orientation: 'landscape',
+        orientation: 'any',
         theme_color: '#140b2e',
         background_color: '#140b2e',
         icons: [{ src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
