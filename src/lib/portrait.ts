@@ -303,6 +303,44 @@ async function keyAndShrink(jpegBase64: string): Promise<string> {
   }
 
   context.putImageData(imageData, 0, 0)
+
+  // Trim transparent margins so the image box hugs her silhouette — the
+  // battle staging anchors the box bottom to the ground, so leftover
+  // padding under her boots would leave her floating above her shadow.
+  let minX = width
+  let minY = height
+  let maxX = -1
+  let maxY = -1
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (pixels[4 * (y * width + x) + 3] > 10) {
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+      }
+    }
+  }
+  if (maxX > minX && maxY > minY) {
+    const pad = Math.round(width * 0.02)
+    minX = Math.max(0, minX - pad)
+    minY = Math.max(0, minY - pad)
+    maxX = Math.min(width - 1, maxX + pad)
+    maxY = Math.min(height - 1, maxY + pad)
+    const trimmed = document.createElement('canvas')
+    trimmed.width = maxX - minX + 1
+    trimmed.height = maxY - minY + 1
+    const trimContext = trimmed.getContext('2d')
+    if (trimContext !== null) {
+      trimContext.drawImage(
+        canvas,
+        minX, minY, trimmed.width, trimmed.height,
+        0, 0, trimmed.width, trimmed.height,
+      )
+      return trimmed.toDataURL('image/png')
+    }
+  }
+
   return canvas.toDataURL('image/png')
 }
 

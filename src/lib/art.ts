@@ -42,3 +42,13 @@ const uiFiles = import.meta.glob<string>('../assets/art/ui/*.{webp,png,jpg}', {
 export function uiImageUrl(name: string): string | null {
   return lookup(uiFiles, name)
 }
+
+const fgFiles = import.meta.glob<string>('../assets/art/fg/*.{webp,png}', {
+  eager: true,
+  import: 'default',
+})
+
+/** Transparent foreground parallax plate for a scene, or null for none. */
+export function fgImageUrl(variant: string): string | null {
+  return lookup(fgFiles, variant)
+}

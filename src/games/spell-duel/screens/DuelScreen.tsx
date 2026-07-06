@@ -13,6 +13,7 @@ import { Pip, type PipMood } from '../art/Pip'
 import { RivalWitch, type RivalMood } from '../art/RivalWitch'
 import { BossPortrait } from '../art/bosses'
 import { loadPortrait } from '../../../lib/portrait'
+import { fgImageUrl, sceneImageUrl } from '../../../lib/art'
 import { WitchAvatar } from '../avatar/WitchAvatar'
 import { DEFAULT_AVATAR, type Expression } from '../avatar/avatarTypes'
 import { SpellCrystal } from '../components/SpellCrystal'
@@ -98,6 +99,11 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
 
   const isExam = focus?.exam === true
   const location = focus ? locationForTable(focus.table) : null
+  // JRPG staging pilot: grounded spots + parallax layers, only when the
+  // scene declares staging AND its painted backdrop exists.
+  const staging = location?.theme.staging
+  const staged = staging !== undefined && location !== null && sceneImageUrl(location.theme.variant) !== null
+  const stagedFg = staged && location !== null ? fgImageUrl(location.theme.variant) : null
   const examReward = isExam && focus ? itemById(EXAM_REWARDS[focus.table] ?? '') : undefined
   // Captured at mount so the finale knows whether the reward is NEW.
   const [rewardIsNew] = useState(
@@ -358,7 +364,7 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
   )
 
   return (
-    <div className={`duel${impactKey > 0 && phase === 'casting' ? ' duel--shake' : ''}`} ref={stageRef}>
+    <div className={`duel${impactKey > 0 && phase === 'casting' ? ' duel--shake' : ''}${staged ? ' duel--staged' : ''}`} ref={stageRef}>
       <DuelBackdrop theme={location?.theme} />
       <DuelMotes />
       <HomeButton onExit={onExit} />
@@ -378,7 +384,43 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
         </span>
       </div>
 
-      <div className="duel-rival">
+      {staged && staging !== undefined && (
+        <>
+          <span
+            className="duel-shadow"
+            style={{
+              left: `${staging.heroShadow.left}%`,
+              bottom: `${staging.heroShadow.bottom}%`,
+              width: `${staging.heroShadow.width}%`,
+            }}
+            aria-hidden="true"
+          />
+          <span
+            className="duel-shadow duel-shadow--boss"
+            style={{
+              left: `${staging.bossShadow.left}%`,
+              bottom: `${staging.bossShadow.bottom}%`,
+              width: `${staging.bossShadow.width}%`,
+            }}
+            aria-hidden="true"
+          />
+        </>
+      )}
+
+      <div
+        className="duel-rival"
+        style={
+          staged && staging !== undefined
+            ? {
+                top: 'auto',
+                right: 'auto',
+                left: `${staging.boss.left}%`,
+                bottom: `${staging.boss.bottom}%`,
+                width: `${staging.boss.width}%`,
+              }
+            : undefined
+        }
+      >
         {phase === 'question' && <div className="speech speech--rival">{blurb}</div>}
         <div
           ref={rivalRef}
@@ -395,7 +437,19 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
         {location && <span className="duel-rival-name">{location.boss.name}</span>}
       </div>
 
-      <div className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`} ref={heroRef}>
+      <div
+        className={`duel-hero${heroCasting ? ' duel-hero--cast' : ''}`}
+        ref={heroRef}
+        style={
+          staged && staging !== undefined
+            ? {
+                left: `${staging.hero.left}%`,
+                bottom: `${staging.hero.bottom}%`,
+                width: `${staging.hero.width}%`,
+              }
+            : undefined
+        }
+      >
         {heroPortrait !== null ? (
           <img className="duel-hero-raster" src={heroPortrait} alt="Your witch" draggable={false} />
         ) : (
@@ -468,6 +522,8 @@ export function DuelScreen({ onExit, onDone, onPlayAgain, focus }: DuelScreenPro
         </div>
       )}
       {phase === 'casting' && impactKey > 0 && <div key={impactKey} className="duel-flash" />}
+
+      {stagedFg !== null && <img className="duel-fg" src={stagedFg} alt="" draggable={false} />}
 
       <canvas className="particle-canvas" ref={canvasRef} />
 

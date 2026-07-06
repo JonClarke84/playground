@@ -76,6 +76,18 @@ export interface SceneTheme {
   glass: string
   /** Signature colour — also tints the map node. */
   accent: string
+  /**
+   * JRPG battle staging (optional pilot, PRODUCT-style §8 pseudo-3D):
+   * grounded character spots as viewport percentages. Scenes without
+   * staging keep the classic corner layout.
+   */
+  staging?: {
+    hero: { left: number; bottom: number; width: number }
+    boss: { left: number; bottom: number; width: number }
+    /** Ground shadows: ellipse centres. */
+    heroShadow: { left: number; bottom: number; width: number }
+    bossShadow: { left: number; bottom: number; width: number }
+  }
 }
 
 export const NIX_PALETTE: RivalPalette = {
@@ -191,7 +203,15 @@ export const MAP_LOCATIONS: MapLocation[] = [
       emblem: 'leaf',
       companion: null,
     },
-    theme: theme('garden', true, ['#0b1f33', '#12324a', '#173b52'], ['#14331f', '#0a1f12'], '#7dd4a0', '#a3e26a'),
+    theme: {
+      ...theme('garden', true, ['#0b1f33', '#12324a', '#173b52'], ['#14331f', '#0a1f12'], '#7dd4a0', '#a3e26a'),
+      staging: {
+        hero: { left: 12, bottom: 10, width: 22 },
+        boss: { left: 66, bottom: 34, width: 20 },
+        heroShadow: { left: 15.5, bottom: 8.5, width: 15 },
+        bossShadow: { left: 70, bottom: 26, width: 13 },
+      },
+    },
     blurbs: [
       'The toadstools are doing star jumps!',
       'The roses have started snoring!',
