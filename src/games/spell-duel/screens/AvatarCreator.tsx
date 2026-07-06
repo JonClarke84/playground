@@ -303,6 +303,12 @@ export function AvatarCreator({ firstRun, onDone }: AvatarCreatorProps) {
             {firstRun ? 'She’s ready!' : 'Done'}
           </button>
 
+          {!hasGeminiKey && (
+            <p className="creator-portrait-hint">
+              🖌️ Want a painted portrait of her? A grown-up can switch it on in the
+              Parents’ corner (hold the little star on the games screen).
+            </p>
+          )}
           {hasGeminiKey && (
             <div className="creator-portrait-section">
               <button

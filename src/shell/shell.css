@@ -440,4 +440,11 @@
     min-width: 0;
     flex-basis: 100%;
   }
+
+  /* The grown-ups' star must not scroll away with the cards. */
+  .parent-corner-entry {
+    position: fixed;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    right: max(14px, env(safe-area-inset-right));
+  }
 }

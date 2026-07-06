@@ -2167,3 +2167,16 @@
 .map-scroll > .map-stage--painted {
   flex: none;
 }
+
+.creator-portrait-hint {
+  margin: 0;
+  max-width: 300px;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed rgba(255, 255, 255, 0.18);
+}
