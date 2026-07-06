@@ -1,0 +1,26 @@
+# Kamal 2 deployment — same droplet + kamal-proxy as the sibling projects
+# (hobbylog, bethforrester.com). Static SPA: nginx serves the Vite build,
+# kamal-proxy routes the hostname and terminates TLS via Let's Encrypt.
+service: playground
+image: jonclarke84/playground
+
+servers:
+  web:
+    hosts:
+      - 68.183.32.103
+
+proxy:
+  ssl: true
+  host: playground.jonathanclarke.dev
+  app_port: 80
+  healthcheck:
+    path: /
+    interval: 3
+
+registry:
+  username: jonclarke84
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
